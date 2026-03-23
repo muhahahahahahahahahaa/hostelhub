@@ -1,46 +1,38 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const path = require("path")
-const connectDB = require("./config/db")
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
+const connectDB = require("./config/db");
 
-const authRoutes = require("./routes/authRoutes")
-const userRoutes = require("./routes/userRoutes")
-const jobRoutes = require("./routes/jobRoutes")
-const applicationRoutes = require("./routes/applicationRoutes")
-const savedJobsRoutes = require("./routes/savedJobsRoutes")
-const analyticsRoute = require("./routes/analyticsRoutes")
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
+const listingRoutes = require("./routes/listingRoutes");
+const inquiryRoutes = require("./routes/inquiryRoutes");
+const savedListingRoutes = require("./routes/savedListingRoutes");
+const analyticsRoute = require("./routes/analyticsRoutes");
 
+const app = express();
 
-
-const app = express()
-
-//middleware to handle cors
 app.use(
     cors({
         origin: "*",
         methods: ["GET", "POST", "PUT", "DELETE"],
-        allowedHeaders: ["Content-Type", "Authorization"]
+        allowedHeaders: ["Content-Type", "Authorization"],
     })
-)
+);
 
-//connect database
 connectDB();
 
-//middleware
-app.use(express.json())
+app.use(express.json());
 
-//routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/jobs", jobRoutes);
-app.use("/api/applications", applicationRoutes);
-app.use("/api/save-jobs", savedJobsRoutes);
-app.use("/api/analytics", analyticsRoute)
+app.use("/api/listings", listingRoutes);
+app.use("/api/inquiries", inquiryRoutes);
+app.use("/api/saved-listings", savedListingRoutes);
+app.use("/api/analytics", analyticsRoute);
 
-//serve uploads folder
-app.use("/uploads", express.static(path.join(__dirname, "uploads"),{}));
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
 
-//start server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));

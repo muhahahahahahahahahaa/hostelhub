@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
 import {
-    Briefcase,
+    House,
     Bookmark,
 } from "lucide-react";
 import { Link, useNavigate} from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import ProfileDropdown from "./ProfileDropdown";
+import { ROUTES } from "../../utils/routePaths";
 
 const Navbar = () => {
 
     const { user, logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+    const isRenter = user?.role === "renter";
+    const profileLabel =
+        user?.role === "owner" ? user?.hostelName || user?.name : user?.name;
 
     //close dropdowns when clicking outside
     useEffect (() => {
@@ -29,19 +33,19 @@ const Navbar = () => {
         <div className="container mx-auto px-4 ">
             <div className="flex items-center justify-between h-16">
                 {/*logo */}
-                <Link to='/find-jobs' className="flex items-center space-x-3">
+                <Link to={ROUTES.HOME} className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-gradient-to-r  from-blue-500 to-blue-600  rounded-lg flex items-center justify-center">
-                        <Briefcase className="w-5 h-5 text-white" />
+                        <House className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-lg font-bold text-gray-900">JobPortal</span>
+                    <span className="text-lg font-bold text-gray-900">HostelHub</span>
                 </Link>
 
                 {/*Auth Buttons */}
                 <div className="flex items-center space-x-3">
-                    {user && (
+                    {isRenter && (
                         <button
                             className="p-2 rounded-xl hover:bg-gray-100 transition-colors duration-200 relative"
-                            onClick={() => navigate("/saved-jobs")}
+                            onClick={() => navigate(ROUTES.SAVED_LISTINGS)}
                         >
                             <Bookmark className="h-5 w-5 text-gray-500"/>
                         </button>
@@ -55,25 +59,25 @@ const Navbar = () => {
                                 setProfileDropdownOpen(!profileDropdownOpen);
                             }}
                             avatar={user?.avatar || ""}
-                            companyName={user?.name || ""}
+                            displayName={profileLabel || ""}
                             email={user?.email || ""}
                             userRole={user?.role || ''}
                             onLogout={logout}
                         />
                     ) : (
                         <>
-                            <a
-                                href="/login"
+                            <Link
+                                to={ROUTES.LOGIN}
                                 className="text-gray-600 hover:text-gray-900 transition-colors font-medium px-4 py-2 rounded-lg hover:bg-gray-50"
                             >
-                                Login
-                            </a>
-                            <a
-                                href="/signup"
+                                Log In
+                            </Link>
+                            <Link
+                                to={ROUTES.SIGNUP}
                                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md"
                             >
                                 Sign Up
-                            </a>
+                            </Link>
                         </>
                     )}
                 </div>

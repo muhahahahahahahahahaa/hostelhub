@@ -1,18 +1,20 @@
-const Job = require("../models/Job");
-const Application = require("../models/Application");
+const Listing = require("../models/Listing");
+const Inquiry = require("../models/Inquiry");
 
 const getTrend = (current, previous) => {
-    if (previous === 0) return current > 0 ? 100 : 0;
-    return Math.round(((current - previous) / previous) *100);
+    if (previous === 0) {
+        return current > 0 ? 100 : 0;
+    }
+    return Math.round(((current - previous) / previous) * 100);
 };
 
-exports.getEmployerAnalytics = async (req, res) => {
-    try{
-        if (req.user.role !== "employer"){
-            return res.status(403).json({message:"access denied"})
+exports.getOwnerAnalytics = async (req, res) => {
+    try {
+        if (req.user.role !== "owner") {
+            return res.status(403).json({ message: "Access denied" });
         }
 
-        const companyId = req.user._id;
+        const ownerId = req.user._id;
 
         const now = new Date();
         const last7Days = new Date(now);
@@ -20,90 +22,89 @@ exports.getEmployerAnalytics = async (req, res) => {
         const prev7Days = new Date(now);
         prev7Days.setDate(now.getDate() - 14);
 
-        // counts
-        const totalActiveJobs = await Job.countDocuments({ company:companyId, isClosed: false});
-        const jobs = await Job.find({company: companyId}).select("_id").lean();
-        const jobIds = jobs.map(job => job._id);
+        const totalActiveListings = await Listing.countDocuments({
+            owner: ownerId,
+            isClosed: false,
+        });
+        const listings = await Listing.find({ owner: ownerId }).select("_id").lean();
+        const listingIds = listings.map((listing) => listing._id);
 
-        const totalApplications = await Application.countDocuments({job: { $in: jobIds}});
-        const totalHired = await Application.countDocuments({
-            job: { $in: jobIds},
-            status: "Accepted",
+        const totalInquiries = await Inquiry.countDocuments({
+            listing: { $in: listingIds },
+        });
+        const totalConfirmed = await Inquiry.countDocuments({
+            listing: { $in: listingIds },
+            status: "Confirmed",
         });
 
-        //trends
-
-        //active job posts trend
-        const activeJobsLast7 = await Job.countDocuments({
-            company: companyId,
-            createdAt: { $gte: last7Days, $lte: now},
+        const activeListingsLast7 = await Listing.countDocuments({
+            owner: ownerId,
+            createdAt: { $gte: last7Days, $lte: now },
         });
 
-        const activeJobsPrev7 = await Job.countDocuments({
-            company: companyId,
-            createdAt:{$gte: prev7Days, $lt: last7Days},
+        const activeListingsPrev7 = await Listing.countDocuments({
+            owner: ownerId,
+            createdAt: { $gte: prev7Days, $lt: last7Days },
         });
 
-        const activeJobTrend = getTrend(activeJobsLast7, activeJobsPrev7);
+        const activeListingsTrend = getTrend(activeListingsLast7, activeListingsPrev7);
 
-        //applications trend
-        const applicationsLast7 = await Application.countDocuments({
-            job:{ $in: jobIds},
-            createdAt: {$gte: last7Days, $lte:now},
+        const inquiriesLast7 = await Inquiry.countDocuments({
+            listing: { $in: listingIds },
+            createdAt: { $gte: last7Days, $lte: now },
         });
 
-        const applicationsPrev7 = await Application.countDocuments({
-            job:{ $in: jobIds},
-            createdAt:{$gte: prev7Days, $lte:last7Days},
+        const inquiriesPrev7 = await Inquiry.countDocuments({
+            listing: { $in: listingIds },
+            createdAt: { $gte: prev7Days, $lte: last7Days },
         });
 
-        const applicantTrend = getTrend(applicationsLast7, applicationsPrev7);
+        const inquiryTrend = getTrend(inquiriesLast7, inquiriesPrev7);
 
-        //hired applicants trend
-        const hiredLast7 = await Application.countDocuments({
-            job:{$in:jobIds},
-            status:"Accepted",
-            createdAt:{$gte: last7Days, $lte:now},
+        const confirmedLast7 = await Inquiry.countDocuments({
+            listing: { $in: listingIds },
+            status: "Confirmed",
+            createdAt: { $gte: last7Days, $lte: now },
         });
 
-        const hiredPrev7 = await Application.countDocuments({
-            job:{$in:jobIds},
-            status:"Accepted",
-            createdAt:{$gte: prev7Days, $lte:last7Days},
+        const confirmedPrev7 = await Inquiry.countDocuments({
+            listing: { $in: listingIds },
+            status: "Confirmed",
+            createdAt: { $gte: prev7Days, $lte: last7Days },
         });
 
-        const hiredTrend = getTrend(hiredLast7, hiredPrev7);
+        const confirmedTrend = getTrend(confirmedLast7, confirmedPrev7);
 
-        //data
-        const recentJobs = await Job.find({ company: companyId})
-        .sort({createdAt: -1 })
-        .limit(5)
-        .select("title location type createdAt isClosed");
+        const recentListings = await Listing.find({ owner: ownerId })
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .select("title location roomType createdAt isClosed");
 
-        const recentApplications = await Application.find({
-            job: {$in: jobIds},
+        const recentInquiries = await Inquiry.find({
+            listing: { $in: listingIds },
         })
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .populate("applicant","name email avatar")
-        .populate("job","title");
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .populate("renter", "name email avatar")
+            .populate("listing", "title");
+
         res.json({
             counts: {
-                totalActiveJobs,
-                totalApplications,
-                totalHired,
-                trends:{
-                    activeJobs: activeJobTrend,
-                    totalApplicants: applicantTrend,
-                    totalHired: hiredTrend
-                }
+                totalActiveListings,
+                totalInquiries,
+                totalConfirmed,
+                trends: {
+                    activeListings: activeListingsTrend,
+                    totalInquiries: inquiryTrend,
+                    totalConfirmed: confirmedTrend,
+                },
             },
-            data:{
-                recentJobs,
-                recentApplications,
+            data: {
+                recentListings,
+                recentInquiries,
             },
         });
-    } catch (err){
-        res.status(500).json({message:"failed to fetch analytics", error:err.message});
+    } catch (err) {
+        res.status(500).json({ message: "Failed to fetch analytics", error: err.message });
     }
-}
+};

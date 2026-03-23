@@ -1,7 +1,28 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 const AuthContext = createContext();
 
+const normalizeUser = (userData) => {
+    if (!userData) return null;
+
+    const normalizedRole =
+        userData.role === "employer"
+            ? "owner"
+            : userData.role === "jobseeker"
+                ? "renter"
+                : userData.role;
+
+    return {
+        ...userData,
+        role: normalizedRole,
+        hostelName: userData.hostelName ?? userData.companyName ?? "",
+        hostelDescription: userData.hostelDescription ?? userData.companyDescription ?? "",
+        hostelLogo: userData.hostelLogo ?? userData.companyLogo ?? "",
+        backgroundCheckDocument: userData.backgroundCheckDocument ?? "",
+    };
+};
+
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if(!context) {
@@ -15,17 +36,24 @@ export const AuthProvider = ({children}) => {
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    useEffect(()=>{
-        checkAuthStatus();
+    const logout = useCallback(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+
+        setUser(null);
+        setIsAuthenticated(false);
+        window.location.href = '/'
     }, []);
 
-    const checkAuthStatus = async () => {
+    const checkAuthStatus = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             const userStr = localStorage.getItem('user');
             if (token && userStr){
-                const userData = JSON.parse(userStr);
+                const userData = normalizeUser(JSON.parse(userStr));
                 setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
                 setIsAuthenticated(true);
             }
         } catch (error){
@@ -34,28 +62,23 @@ export const AuthProvider = ({children}) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [logout]);
+
+    useEffect(()=>{
+        checkAuthStatus();
+    }, [checkAuthStatus]);
 
     const login = (userData, token) => {
+        const normalizedUser = normalizeUser(userData);
         localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('user', JSON.stringify(normalizedUser));
 
-        setUser(userData);
+        setUser(normalizedUser);
         setIsAuthenticated(true);
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-
-        setUser(null);
-        setIsAuthenticated(false);
-        window.location.href = '/'
-    };
-
     const updateUser = (updatedUserData) => {
-        const newUserData = {...user, ...updatedUserData};
+        const newUserData = normalizeUser({ ...user, ...updatedUserData });
         localStorage.setItem('user', JSON.stringify(newUserData));
         setUser(newUserData);
     };

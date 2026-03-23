@@ -1,16 +1,14 @@
-import React from "react";
-
 const StatusBadge = ({status}) => {
     const statusConfig = {
-        Applied: "bg-gray-100 text-gray-800",
-        Interview: "bg-yellow-100 text-yellow-800",
-        Hired: "bg-green-100 text-green-800",
-        Rejected: "bg-red-100 text-red-800"
+        New: "bg-sky-100 text-sky-800",
+        Contacted: "bg-amber-100 text-amber-800",
+        Confirmed: "bg-emerald-100 text-emerald-800",
+        Declined: "bg-rose-100 text-rose-800",
     };
 
     return (
         <span
-            className={`px-3 py-1 rounded text-sm font-medium ${
+            className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
                 statusConfig[status] || "bg-gray-100 text-gray-800"
             }`}
         >

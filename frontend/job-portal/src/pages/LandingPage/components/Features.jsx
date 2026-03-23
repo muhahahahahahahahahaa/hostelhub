@@ -1,5 +1,4 @@
-import React from 'react';
-import {jobSeekerFeatures, employerFeatures} from '../../../utils/data'
+import { renterFeatures, ownerFeatures } from '../../../utils/data';
 
 const Features = () => {
   return (
@@ -7,27 +6,26 @@ const Features = () => {
         <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    Everything You Need To
+                    Everything you need for
                     <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent ">
-                        Succeed
+                        hostel rentals
                     </span>
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Whether you're looking for your next opportunity of the perfect 
-                    candidate, we have the tools and features to make it happen.
+                    A hostel portal built for renters to choose faster and owners to manage listings and inquiries in one place.
                 </p>
             </div>
             <div className="grid md:grid-cols-2 gap-16 lg:gap-24">
-                {/* JobSeeker section*/}
+                {/* renter section*/}
                 <div>
                     <div className="text-center mb-12">
                         <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                            For Job Seekers
+                            For Renters
                         </h3>
                         <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto rounded-full" />
                     </div>
                     <div className="space-y-8">
-                        {jobSeekerFeatures.map((feature, index)=>(
+                        {renterFeatures.map((feature, index)=>(
                             <div
                                 key={index}
                                 className="group flex items-start space-x-4 p-6 rounded-2xl hover:bg-blue-50 transition-all duration-300 cursor-pointer"
@@ -47,16 +45,16 @@ const Features = () => {
                         ))}
                     </div>
                 </div>
-                {/*employer section */}
+                {/*owner section */}
                 <div>
                     <div className="text-center mb-12">
                         <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                            For Employers
+                            For Owners
                         </h3>
                         <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-600 mx-auto rounded-full"/>
                     </div>
                     <div className="space-y-8">
-                        {employerFeatures.map((feature, index)=>(
+                        {ownerFeatures.map((feature, index)=>(
                             <div
                             key={index}
                             className="group flex items-start space-x-4 p-6 rounded-2xl hover:bg-purple-50 transition-all duration-300 cursor-pointer"

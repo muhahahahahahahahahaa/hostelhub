@@ -1,19 +1,19 @@
 
 export const validateEmail = (email) =>{
-    if (!email.trim()) return 'Email is required,';
+    if (!email.trim()) return "Please enter your email address.";
     const emailRedex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRedex.test(email)) return 'Please enter a valid email address.';
-    return '';
+    if (!emailRedex.test(email)) return "Please enter a valid email address.";
+    return "";
 };
 export const validatePassword = (password) =>{
-    if (!password) return 'Password is required';
-    if (password.length < 8) return 'Password must be at least 8 characters long.';
+    if (!password) return "Please enter your password.";
+    if (password.length < 8) return "Password must be at least 8 characters long.";
     if (!/(?=.*[a-z])/.test(password))
-        return 'Password must contain at least one lowercase letter.';
+        return "Password must include at least one lowercase letter.";
     if (!/(?=.*[A-Z])/.test(password))
-        return 'Password must contain at least one uppercase letter.';
+        return "Password must include at least one uppercase letter.";
     if (!/(?=.*\d)/.test(password))
-        return 'Password must contain at least one number.';
+        return "Password must include at least one number.";
     return "";
 };
 export const validateAvatar = (file) =>{
@@ -24,7 +24,22 @@ export const validateAvatar = (file) =>{
     }
     const maxSizeInBytes = 5 * 1024 * 1024; //5MB
     if (file.size > maxSizeInBytes){
-        return "Avatar size must be less than 5MB.";
+        return "Avatar must be smaller than 5MB.";
+    }
+    return "";
+}
+
+export const validateBackgroundDocument = (file) => {
+    if (!file) return "";
+
+    const allowedTypes = ["application/pdf", "image/png"];
+    if (!allowedTypes.includes(file.type)) {
+        return "Document must be a PDF or PNG file.";
+    }
+
+    const maxSizeInBytes = 10 * 1024 * 1024;
+    if (file.size > maxSizeInBytes) {
+        return "Document must be smaller than 10MB.";
     }
     return "";
 }
@@ -37,3 +52,27 @@ export const getInitials = (name)=> {
         .toUpperCase()
         .slice(0, 2)
 }
+
+export const formatCurrency = (value) => {
+    if (value === undefined || value === null || value === "") {
+        return "Negotiable";
+    }
+
+    return `${Number(value).toLocaleString()}₮`;
+};
+
+export const formatCompactCurrency = (value) => {
+    const amount = Number(value);
+    if (!Number.isFinite(amount)) return "Negotiable";
+    if (amount >= 1000000) {
+        return `${(amount / 1000000).toFixed(amount >= 10000000 ? 0 : 1)}M₮`;
+    }
+    if (amount >= 1000) {
+        return `${(amount / 1000).toFixed(amount >= 100000 ? 0 : 1)}k₮`;
+    }
+    return `${amount}₮`;
+};
+
+export const getRoleLabel = (role) => (
+    role === "owner" ? "Owner" : "Renter"
+);

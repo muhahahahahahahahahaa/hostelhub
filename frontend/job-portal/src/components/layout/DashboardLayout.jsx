@@ -1,7 +1,6 @@
-import React, { Children } from "react";
 import { useState, useEffect } from "react";
 import {
-    Briefcase,
+    House,
     Building2,
     LogOut,
     Menu,
@@ -11,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { NAVIGATION_MENU } from "../../utils/data";
 import ProfileDropdown from "./ProfileDropdown";
+import { ROUTES } from "../../utils/routePaths";
 
 const NavigationItem = ({item, isActive, onClick, isCollapsed}) => {
     const Icon = item.icon
@@ -35,6 +35,7 @@ const DashboardLayout = ({activeMenu, children}) => {
 
     const {user, logout} = useAuth();  
     const navigate = useNavigate();
+    const profileLabel = user?.hostelName || user?.name || "Owner";
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeNavItem, setActiveNavItem] = useState(activeMenu || 'dashboard');
@@ -99,11 +100,11 @@ const DashboardLayout = ({activeMenu, children}) => {
                 {/*company logo */}
                 <div className= "flex items-center h-16 border-b border-gray-200 pl-6">
                     {!sidebarCollapsed ? (
-                        <Link className="flex items-center space-x-3" to='/'>
+                        <Link className="flex items-center space-x-3" to={ROUTES.HOME}>
                             <div className="h-8 w-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                                <Briefcase className="h-5 w-5 text-white"/>
+                                <House className="h-5 w-5 text-white"/>
                             </div>
-                            <span className="text-gray-900 font-bold text-xl">JobPortal</span>
+                            <span className="text-gray-900 font-bold text-xl">HostelHub</span>
                         </Link>
                     ) : (
                         <div className="h-8 w-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
@@ -167,7 +168,7 @@ const DashboardLayout = ({activeMenu, children}) => {
                                 Welcome back!
                             </h1>
                             <p className="text-sm text-gray-500 hidden sm:block">
-                                Here's what's happening with your jobs today.
+                                Here's what is happening with your hostel listings today.
                             </p>
                         </div>
                     </div>
@@ -180,8 +181,9 @@ const DashboardLayout = ({activeMenu, children}) => {
                                 setProfileDropdownOpen(!profileDropdownOpen);
                             }}
                             avatar={user?.avatar || ""}
-                            companyName={user?.name || ""}
+                            displayName={profileLabel}
                             email={user?.email || ""}
+                            userRole={user?.role || ""}
                             onLogout={logout}
                         />
                     </div>

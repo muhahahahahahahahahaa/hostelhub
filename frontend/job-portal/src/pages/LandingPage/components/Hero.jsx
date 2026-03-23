@@ -2,16 +2,15 @@ import { motion as Motion } from "framer-motion";
 import {Search, ArrowRight, Users, Building2, TrendingUp} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-
-
+import { ROUTES } from "../../../utils/routePaths";
 
 const Hero = () => {
     const {user, isAuthenticated} = useAuth();
     const navigate = useNavigate();
     const stats =[
-        {icon: Users, label: 'Active Users', value: '2.4M+'},
-        {icon: Building2, label: 'Companies', value: '50K+'},
-        {icon: TrendingUp, label: 'Jobs Posted', value: '150K+'},
+        {icon: Users, label: 'Monthly Inquiries', value: '4.8K+'},
+        {icon: Building2, label: 'Listed Hostels', value: '320+'},
+        {icon: TrendingUp, label: 'Available Beds', value: '1.2K+'},
     ];
   return (
     <section className="pt-24 pb-16 bg-white min-h-screen flex items-center">
@@ -23,9 +22,9 @@ const Hero = () => {
                     animate={{opacity:1, y:0}}
                     transition={{duration:0.8}}
                     className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight placeholder-teal-10">
-                        Find your Dream Job or
+                        Find the right
                         <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mt-2">
-                            Perfect Hire
+                            hostel in the city
                         </span>
                 </Motion.h1>
                 {/*subheading*/}
@@ -35,8 +34,7 @@ const Hero = () => {
                     transition={{delay:0.2, duration:0.8}}
                     className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed"
                 >
-                    Connect talented professionals with innovative companies.
-                    Your next career move or perfect candidate is just a click away.
+                    Compare monthly rent, deposit, available beds, amenities, and house rules in one place, then send an inquiry directly to the owner.
                 </Motion.p>
                 {/*CTA button*/}
                 <Motion.div
@@ -49,11 +47,11 @@ const Hero = () => {
                         whileHover={{scale:1.02}}
                         whileTap={{scale:0.98}}
                         className="group bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-2"
-                        onClick={() => navigate("/find-jobs")}
+                        onClick={() => navigate(ROUTES.FIND_HOSTELS)}
                     >
                         <Search className="w-5 h-5"/>
                         <span>
-                            Find Jobs
+                            Browse Hostels
                         </span>
                         <ArrowRight className="w-5 h-5 group-hover:transition-transform "/>
                     </Motion.button>
@@ -61,12 +59,12 @@ const Hero = () => {
                         whileHover={{scale:1.02}}
                         whileTap={{scale:0.98}}
                         className="bg-white border-2 border-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md"
-                        onClick={() => {navigate(isAuthenticated && user?.role==="employer"
-                            ?"/employer-dashboard"
-                            :"/login");
+                        onClick={() => {navigate(isAuthenticated && user?.role==="owner"
+                            ?ROUTES.OWNER_DASHBOARD
+                            :ROUTES.LOGIN);
                         }}
                     >
-                        Post a job
+                        Post a Listing
                     </Motion.button>
                 </Motion.div>
                 {/*stats*/}

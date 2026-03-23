@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {motion as Motion} from 'framer-motion';
 import {
   User,
@@ -18,6 +18,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import uploadImage from '../../utils/uploadImage';
 import { useAuth } from '../../context/AuthContext';
+import { ROUTES } from '../../utils/routePaths';
 
 
 const SignUp = () => {
@@ -106,7 +107,6 @@ const SignUp = () => {
     e.preventDefault();
     if (!validateForm()) return;
     setFormState((prev) => ({...prev, loading:true}));
-    // eslint-disable-next-line no-empty
     try {
       let avatarUrl ="";
 
@@ -138,9 +138,9 @@ const SignUp = () => {
         //redirect based on role
         setTimeout(() => {
           window.location.href = 
-            formData.role === "employer"
-              ? "/employer-dashboard"
-              : "/find-jobs";
+            formData.role === "owner"
+              ? ROUTES.OWNER_DASHBOARD
+              : ROUTES.FIND_HOSTELS;
         }, 2000);
       }
     } catch (error){
@@ -166,11 +166,9 @@ const SignUp = () => {
             className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center"
           >
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4"/>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Account Created!
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful</h2>
             <p className="text-gray-600 mb-4">
-              Welcome to JobPortal! Your account has been successfully created.
+              Welcome to HostelHub. Redirecting you to your dashboard.
             </p>
             <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto"/>
             <p className="text-sm text-gray-500 mt-2">Redirecting to your dashboard...</p>
@@ -191,7 +189,7 @@ const SignUp = () => {
             Create Account
           </h2>
           <p className="text-sm text-gray-600">
-            Join thousands of professionals finding their dream jobs 
+            Create an account to post hostel listings or find the right room
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -225,7 +223,7 @@ const SignUp = () => {
           {/*Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address *
+              Email *
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"/>
@@ -237,7 +235,7 @@ const SignUp = () => {
                 className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
                   formState.errors.email ? "border-red-500": "border-gray-300"
                 } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
-                placeholder="Enter your email"
+                placeholder="Email address"
               />
             </div>
             {formState.errors.email &&(
@@ -293,7 +291,7 @@ const SignUp = () => {
           {/*avatar upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Profile Picture (Optional)
+              Profile Photo (Optional)
             </label>
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
@@ -320,9 +318,9 @@ const SignUp = () => {
                   className="cursor-pointer bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center space-x-2"
                 >
                   <Upload className="w-4 h-4"/>
-                  <span>Upload Photo</span>
+                  <span>Upload Image</span>
                 </label>
-                <p className="text-xs text-gray-500 mt-1">JPG, PNG up to 5MB</p>
+                <p className="text-xs text-gray-500 mt-1">JPG or PNG, up to 5MB</p>
               </div>
             </div>
             {formState.errors.avatar && (
@@ -340,31 +338,31 @@ const SignUp = () => {
             <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
-                onClick={() => handleRoleChange("jobseeker")}
+                onClick={() => handleRoleChange("renter")}
                 className={`p-4 rounded-lg border-2 transition-all ${
-                  formData.role === "jobseeker"
+                  formData.role === "renter"
                   ? "border-blue-500 bg-blue-50 text-blue-700"
                   : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <UserCheck className="w-8 h-8 mx-auto mb-2" />
-                <div className="font-medium">Job Seeker</div>
+                <div className="font-medium">Renter</div>
                 <div className="text-xs text-gray-500">
-                  Looking for oppertunities
+                  Looking for a room
                 </div>
               </button>
               <button 
                 type="button"
-                onClick={() => handleRoleChange("employer")}
+                onClick={() => handleRoleChange("owner")}
                 className={`p-4 rounded-lg border-2 transition-all ${
-                  formData.role ==="employer"
+                  formData.role ==="owner"
                   ? "border-blue-500 bg-blue-50 text-blue-700"
                   : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <Building2 className="w-8 h-8 mx-auto mb-2"/>
-                <div className="font-medium">Employer</div>
-                <div className="text-xs text-gray-500">Hiring talent</div>
+                <div className="font-medium">Owner</div>
+                <div className="text-xs text-gray-500">Posting hostel listings</div>
               </button>
             </div>
             {formState.errors.role && (
@@ -395,18 +393,18 @@ const SignUp = () => {
                 <span>Creating Account...</span>
               </>
             ) : (
-              <span>Create Account</span>
+              <span>Sign Up</span>
             )}
           </button>
           {/*Login link */}
           <div className="text-center">
             <p className="text-gray-600">
-              Already have an account?{""}
+              Already have an account?{" "}
               <a 
-                href="/login"
+                href={ROUTES.LOGIN}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                Sign in here 
+                Log In
               </a>
             </p>
           </div>

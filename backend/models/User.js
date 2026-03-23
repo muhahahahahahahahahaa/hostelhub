@@ -5,13 +5,12 @@ const userSchema = new mongoose.Schema({
     name: {type: String, required: true},
     email: {type: String, required:true, unique: true},
     password: {type: String, required:true},
-    role: {type: String, enum: ["jobseeker", "employer"], required: true},
+    role: {type: String, enum: ["renter", "owner"], required: true},
     avatar: String,
-    resume: String,
-    // for employer
-    companyName: String,
-    companyDescription: String,
-    companyLogo: String,
+    backgroundCheckDocument: String,
+    hostelName: String,
+    hostelDescription: String,
+    hostelLogo: String,
 },{timestamps: true});
 
 //encrypt password before save

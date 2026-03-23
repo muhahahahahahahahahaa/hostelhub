@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {motion as Motion} from 'framer-motion';
 import {
   Mail,
@@ -13,6 +13,7 @@ import { validateEmail, validatePassword } from '../../utils/helper';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { useAuth } from '../../context/AuthContext';
+import { ROUTES } from '../../utils/routePaths';
 
 const Login = () => {
   const { login } = useAuth();
@@ -83,19 +84,11 @@ const Login = () => {
         //redirect based on role
         setTimeout(() => {
           window.location.href = 
-            role === "employer"
-              ? "/employer-dashboard"
-              : "/find-jobs";
+            role === "owner"
+              ? ROUTES.OWNER_DASHBOARD
+              : ROUTES.FIND_HOSTELS;
         }, 2000);
       }
-
-      {/*/redirect based on  user role
-      setTimeout(() => {
-        const redirectPath = user.role === 'employer'
-          ? '/employer-dashboard'
-          : '/find-jobs';
-        window.location.href = redirectPath;
-      }, 1500);*/}
     }catch (error){
       setFormState(prev => ({
         ...prev,
@@ -115,9 +108,9 @@ const Login = () => {
           className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center"
         >
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4"/>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Login Successful</h2>
           <p className="text-gray-600 mb-4">
-            You have been successfully logged in.
+            Redirecting you to your dashboard.
           </p>
           <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto"/>
           <p className="text-sm text-gray-500 mt-2">Redirecting to your dashboard...</p>
@@ -134,14 +127,14 @@ const Login = () => {
         className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full"
       >
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-          <p className="text-gray-600">Sign in to your JobPortal account</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Log In</h2>
+          <p className="text-gray-600">Continue with your HostelHub account</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/*email*/}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
+              Email
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"/>
@@ -153,7 +146,7 @@ const Login = () => {
                 className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
                   formState.errors.email ? 'border-red-500': 'border-gray-300'
                 } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
-                placeholder="Enter your email"
+                placeholder="Email address"
               />
             </div>
             {formState.errors.email &&(
@@ -213,18 +206,18 @@ const Login = () => {
             {formState.loading ? (
               <>
                 <Loader className="w-5 h-5 animate-spin"/>
-                <span>Signing In</span>
+                <span>Logging In</span>
               </>
             ):(
-              <span>Sign In</span>
+              <span>Log In</span>
             )}
           </button>
           {/*sign up link */}
           <div className="text-center">
             <p className="text-gray-600">
-              Don't have an account? {''}
-              <a href="/signup" className="text-blue-600 hover:text-blue-700 font-medium">
-                Create one here.
+              Don&apos;t have an account?{" "}
+              <a href={ROUTES.SIGNUP} className="text-blue-600 hover:text-blue-700 font-medium">
+                Sign Up
               </a>
             </p>
           </div>

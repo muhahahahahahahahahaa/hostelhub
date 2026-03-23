@@ -2,39 +2,45 @@ export const BASE_URL = "http://localhost:8000";
 
 export const API_PATHS = {
     AUTH: {
-        REGISTER: "/api/auth/register", //signup
-        LOGIN: "/api/auth/login", //authenticate user && return jwt token
-        GET_PROFILE: "/api/auth/profile", //get logged in user details
-        UPDATE_PROFILE: "/api/user/profile", // update profile details
-        DELETE_RESUME: "/api/user/resume", // delete resume details
+        REGISTER: "/api/auth/register",
+        LOGIN: "/api/auth/login",
+        GET_PROFILE: "/api/auth/me",
+        UPDATE_PROFILE: "/api/user/profile",
     },
 
     DASHBOARD: {
-        OVERVIEW: `/api/analytics/overview`,
+        OVERVIEW: "/api/analytics/overview",
     },
 
-    JOBS: {
-        GET_ALL_JOBS: '/api/jobs',
-        GET_JOB_By_ID: (id) => `/api/jobs/${id}`,
-        POST_JOB: "/api/jobs",
-        GET_JOBS_EMPLOYER: "/api/jobs/get-jobs-employer",
-        GET_JOB_BY_ID:(id) => `/api/jobs/${id}`,
-        UPDATE_JOB:(id) => `/api/jobs/${id}`,
-        TOGGLE_CLOSE: (id) => `/api/jobs/${id}/toggle-close`,
-        DELETE_JOB:(id) => `/api/jobs/${id}`,
-
-        SAVE_JOB: (id) => `/api/save-jobs/${id}`,  
-        UNSAVE_JOB: (id) => `/api/save-jobs/${id}`, 
-        GET_SAVED_JOB: '/api/save-jobs/my', 
+    LISTINGS: {
+        GET_ALL: "/api/listings",
+        GET_BY_ID: (id) => `/api/listings/${id}`,
+        CREATE: "/api/listings",
+        GET_OWNER: "/api/listings/owner",
+        UPDATE: (id) => `/api/listings/${id}`,
+        TOGGLE_CLOSE: (id) => `/api/listings/${id}/toggle-close`,
+        DELETE: (id) => `/api/listings/${id}`,
     },
 
-    APPLICATIONS: {
-        APPLY_TO_JOB:(id) => `/api/applications/${id}`,
-        GET_ALL_APPLICATIONS:(id) => `/api/applications/job/${id}`,
-        UPDATE_STATUS: (id) => `/api/applications/${id}/status`,
+    SAVED_LISTINGS: {
+        SAVE: (id) => `/api/saved-listings/${id}`,
+        UNSAVE: (id) => `/api/saved-listings/${id}`,
+        GET_MINE: "/api/saved-listings/my",
+    },
+
+    INQUIRIES: {
+        CREATE: (id) => `/api/inquiries/${id}`,
+        GET_MINE: "/api/inquiries/my",
+        GET_FOR_LISTING: (id) => `/api/inquiries/listing/${id}`,
+        GET_BY_ID: (id) => `/api/inquiries/${id}`,
+        UPDATE_STATUS: (id) => `/api/inquiries/${id}/status`,
     },
 
     IMAGE: {
-        UPLOAD_IMAGE: "/api/auth/upload-image", //upload profile picture
+        UPLOAD_IMAGE: "/api/auth/upload-image",
+    },
+
+    FILE: {
+        UPLOAD_FILE: "/api/auth/upload-file",
     },
 };

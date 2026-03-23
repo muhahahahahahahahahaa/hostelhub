@@ -1,15 +1,13 @@
-import { useState } from "react"
+const RentRangeSlider = ({ filters, handleFilterChange }) => {
+    const minRent = filters?.minRent || "";
+    const maxRent = filters?.maxRent || "";
 
-
-const SalaryRangeSlider = ({filters, handleFilterChange}) => {
-    const [minSalary, setMinSalary] = useState(filters?.minSalary || 0);
-    const [maxSalary, setMaxSalary] = useState(filters?.maxSalary || 0);
   return (
     <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Min Salary
+                    Minimum Rent
                 </label>
                 <input
                     type="number"
@@ -17,12 +15,11 @@ const SalaryRangeSlider = ({filters, handleFilterChange}) => {
                     min="0"
                     step="1000"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                    value={minSalary || ""}
-                    onChange={({target}) => setMinSalary(target.value)}
-                    onBlur={() =>
+                    value={minRent}
+                    onChange={({ target }) =>
                         handleFilterChange(
-                            "minSalary",
-                            minSalary ? parseInt(minSalary) : ""
+                            "minRent",
+                            target.value ? parseInt(target.value, 10) : ""
                         )
                     }
                 />
@@ -30,34 +27,33 @@ const SalaryRangeSlider = ({filters, handleFilterChange}) => {
 
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Max Salary
+                    Maximum Rent
                 </label>
                 <input
                     type="number"
-                    placeholder="no limit"
+                    placeholder="No limit"
                     min="0"
                     step="1000"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                    value={maxSalary || ""}
-                    onChange={({ target}) => setMaxSalary(target.value)}
-                    onBlur={() =>
+                    value={maxRent}
+                    onChange={({ target }) =>
                         handleFilterChange(
-                            "maxSalary",
-                            maxSalary ? parseInt(maxSalary) : ""
+                            "maxRent",
+                            target.value ? parseInt(target.value, 10) : ""
                         )
                     }
                 />
             </div>
         </div>
         {/*Display current range */}
-        {(minSalary || maxSalary) ? (
+        {(minRent || maxRent) ? (
             <div className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded">
-                Range: {minSalary ? `$${minSalary.toLocaleString()}` : "$0"} -{" "}
-                {maxSalary ? `$${maxSalary.toLocaleString()}` : "No limit"}
+                Rent: {minRent ? `${Number(minRent).toLocaleString()}₮` : "0₮"} -{" "}
+                {maxRent ? `${Number(maxRent).toLocaleString()}₮` : "No limit"}
             </div>
         ) : null}
     </div>
   )
 }
 
-export default SalaryRangeSlider
+export default RentRangeSlider;

@@ -1,8 +1,9 @@
 import {Save, X} from "lucide-react"
 import DashboardLayout from '../../components/layout/DashboardLayout';
+import { getInitials } from "../../utils/helper";
 
 
-const EditProfileDetials = ({
+const EditOwnerProfile = ({
   formData,
   handleImageChange,
   handleInputChange,
@@ -12,14 +13,14 @@ const EditProfileDetials = ({
   uploading,
 }) => {
   return (
-    <DashboardLayout activeMenu='company-profile'>
+    <DashboardLayout activeMenu='owner-profile'>
       {formData && 
         <div className="min-h-screen bg-gray-50 py-8 px-4">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               {/*header */}
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6">
-                <h1 className="text-lg md:text-xl font-medium text-white">Edit Profile</h1>
+                <h1 className="text-lg md:text-xl font-medium text-white">Edit Owner Profile</h1>
               </div>
               
               {/*edit form */}
@@ -34,11 +35,19 @@ const EditProfileDetials = ({
                     {/*Avatar Upload */}
                     <div className="flex items-center space-x-4">
                       <div className="relative">
-                        <img
-                          src={formData?.avatar}
-                          alt="Avatar"
-                          className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
-                        />
+                        {formData?.avatar ? (
+                          <img
+                            src={formData?.avatar}
+                            alt="Avatar"
+                            className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 rounded-full border-4 border-gray-200 bg-blue-100 flex items-center justify-center">
+                            <span className="text-lg font-semibold text-blue-700">
+                              {getInitials(formData?.name || "Owner")}
+                            </span>
+                          </div>
+                        )}
                         {uploading?.avatar && (
                           <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
                             <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -91,17 +100,23 @@ const EditProfileDetials = ({
                   {/*company information */}
                   <div className="space-y-6">
                     <h2 className="text-lg font-medium text-gray-800 border-b pb-2">
-                      Company Information
+                      Hostel Information
                     </h2>
 
-                    {/*company logo upload */}
+                    {/*hostel logo upload */}
                     <div className="flex items-center space-x-4">
                       <div className="relative">
-                        <img
-                          src={formData.companyLogo}
-                          alt="Company Logo"
-                          className="w-20 h-20 rounded-lg object-cover border-4 border-gray-200"
-                        />
+                        {formData.hostelLogo ? (
+                          <img
+                            src={formData.hostelLogo}
+                            alt="Hostel Logo"
+                            className="w-20 h-20 rounded-lg object-cover border-4 border-gray-200"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 rounded-lg border-4 border-gray-200 bg-blue-100 flex items-center justify-center">
+                            <span className="text-sm font-semibold text-blue-700">Hostel</span>
+                          </div>
+                        )}
                         {uploading.logo && (
                           <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
                             <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -110,7 +125,7 @@ const EditProfileDetials = ({
                       </div>
                       <div>
                         <label className="block">
-                          <span className="sr-only">Choose company logo</span>
+                          <span className="sr-only">Choose hostel logo</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -121,38 +136,38 @@ const EditProfileDetials = ({
                       </div>
                     </div>
 
-                    {/*company name */}
+                    {/*hostel name */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Company Name
+                        Hostel Name
                       </label>
                       <input
                         type="text"
-                        value={formData.companyLogo}
+                        value={formData.hostelName}
                         onChange={(e) =>
-                          handleInputChange("companyName", e.target.value)
+                          handleInputChange("hostelName", e.target.value)
                         }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        placeholder="Enter company name"
+                        placeholder="Enter hostel name"
                       />
                     </div>
 
-                    {/*company description */}
+                    {/*hostel description */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Company Description
+                        Hostel Description
                       </label>
                       <textarea
-                        value={formData.companyDescription}
+                        value={formData.hostelDescription}
                         onChange={(e) =>
                           handleInputChange(
-                            "companyDescription",
+                            "hostelDescription",
                             e.target.value
                           )
                         }
                         rows={4}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                        placeholder="Describe your company..."
+                        placeholder="Describe your hostel..."
                       />
                     </div>
                   </div>
@@ -189,4 +204,4 @@ const EditProfileDetials = ({
   )
 }
 
-export default EditProfileDetials; 
+export default EditOwnerProfile; 

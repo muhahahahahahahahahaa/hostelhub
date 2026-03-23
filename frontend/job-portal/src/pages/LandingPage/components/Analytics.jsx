@@ -1,34 +1,53 @@
 import {motion as Motion} from 'framer-motion';
-import {TrendingUp, Users, Briefcase, Target} from 'lucide-react';
+import {TrendingUp, Users, House, Target} from 'lucide-react';
 
 const Analytics = () => {
+    const colorClasses = {
+        blue: {
+            iconBg: "bg-blue-100",
+            iconText: "text-blue-600",
+        },
+        purple: {
+            iconBg: "bg-purple-100",
+            iconText: "text-purple-600",
+        },
+        green: {
+            iconBg: "bg-emerald-100",
+            iconText: "text-emerald-600",
+        },
+        orange: {
+            iconBg: "bg-orange-100",
+            iconText: "text-orange-600",
+        },
+    };
+
     const stats = [
         {
             icon: Users,
-            title: 'Active Users',
-            value: '2.4M+',
-            growth: '+15%',
+            title: 'Active Renters',
+            value: '2.4K+',
+            growth: '+12%',
             color: 'blue'
         },
         {
-            icon: Briefcase,
-            title:'Jobs Posted',
-            value: '150K+',
-            growth: '+22%',
+            icon: House,
+            title:'Active Listings',
+            value: '320+',
+            growth: '+18%',
             color: 'purple'
         },
         {
             icon: Target,
-            title: 'Successful Hires',
-            value: '89K+',
-            growth: '+18%',
+            title: 'Confirmed Inquiries',
+            value: '840+',
+            growth: '+9%',
             color: 'green'
         },
         {
             icon: TrendingUp,
-            title: 'Match Rate',
-            value: '94%',
-            growth: '+8%',
+            title: 'Occupancy Rate',
+            value: '91%',
+            growth: '+6%',
             color: 'orange'
         }
     ];
@@ -43,13 +62,13 @@ const Analytics = () => {
                 className="text-center mb-16"
             >
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    Platform
+                    HostelHub
                     <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        Analytics
+                        Statistics
                     </span>
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Real-time insights and data-driven results that showcase the power of our platform in connecting talent with opportunities.
+                    Example platform metrics that highlight growth in listings, inquiries, and occupancy.
                 </p>
             </Motion.div>
             {/*Stat cards */}
@@ -64,8 +83,8 @@ const Analytics = () => {
                         className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
                     >
                         <div className="flex items-center justify-between mb-4">
-                            <div className={`w-12 h-12 bg-${stat.color}-100 rounded-xl flex items-center justify-center`}>
-                                <stat.icon className={`w-6 h-6 text-${stat.color}-600`} />
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colorClasses[stat.color].iconBg}`}>
+                                <stat.icon className={`w-6 h-6 ${colorClasses[stat.color].iconText}`} />
                             </div>
                             <span className="text-green-500 text-sm font-semibold bg-green-50 px-2 py-1 rounded-full">
                                 {stat.growth}

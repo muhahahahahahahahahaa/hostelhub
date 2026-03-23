@@ -1,5 +1,5 @@
-import { Download, X } from "lucide-react";
-import { useState } from "react";
+import { Coins, ExternalLink, FileText, MapPin, Users, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { getInitials } from "../../utils/helper";
 import moment from "moment";
 import axiosInstance from "../../utils/axiosInstance";
@@ -7,17 +7,21 @@ import { API_PATHS } from "../../utils/apiPaths";
 import toast from "react-hot-toast";
 
 import StatusBadge from "../StatusBadge";
-const statusOptions = ["Applied", "In Review", "Rejected", "Accepted"];
+import { formatCurrency } from "../../utils/helper";
 
-const ApplicantProfilePreview = ({
-    selectedApplicant,
-    setSelectedApplicant,
-    handleDownloadResume,
+const statusOptions = ["New", "Contacted", "Confirmed", "Declined"];
+
+const InquiryPreview = ({
+    selectedInquiry,
+    setSelectedInquiry,
     handleClose,
 }) => {
-
-    const [currentStatus, setCurrentStatus] = useState(selectedApplicant.status)
+    const [currentStatus, setCurrentStatus] = useState(selectedInquiry.status)
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setCurrentStatus(selectedInquiry.status);
+    }, [selectedInquiry]);
 
     const onChangeStatus = async (e) => {
         const newStatus = e.target.value;
@@ -26,18 +30,16 @@ const ApplicantProfilePreview = ({
 
         try {
             const response = await axiosInstance.put(
-                API_PATHS.APPLICATIONS.UPDATE_STATUS(selectedApplicant._id),
+                API_PATHS.INQUIRIES.UPDATE_STATUS(selectedInquiry._id),
                 {status: newStatus}
             );
             if (response.status === 200) {
-                // update local state after successful update
-                setSelectedApplicant({...selectedApplicant, status: newStatus});
-                toast.success("Application status updated successfully")
+                setSelectedInquiry({ ...selectedInquiry, status: newStatus });
+                toast.success("Inquiry status updated successfully")
             }
         } catch (err) {
             console.error ("Error updating status:", err);
-            // optionlly revert status if failed
-            setCurrentStatus(selectedApplicant.status);
+            setCurrentStatus(selectedInquiry.status);
         } finally {
             setLoading(false);
         }
@@ -48,7 +50,7 @@ const ApplicantProfilePreview = ({
                 {/*modal header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-900">
-                        Applicant Profile
+                        Renter Inquiry
                     </h3>
                     <button
                         onClick={() => handleClose()}
@@ -61,39 +63,70 @@ const ApplicantProfilePreview = ({
                 {/*modal content */}
                 <div className="p-6">
                     <div className="text-center mb-6">
-                        {selectedApplicant.applicant.avatar ? (
+                        {selectedInquiry.renter.avatar ? (
                             <img 
-                                src={selectedApplicant.applicant.avatar}
-                                alt={selectedApplicant.applicant.name}
+                                src={selectedInquiry.renter.avatar}
+                                alt={selectedInquiry.renter.name}
                                 className="h-20 w-20 rounded-full object-cover mx-auto"
                             />
                         ) : (
                             <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center mx-auto">
                                 <span className="text-blue-600 font-semibold text-xl">
-                                    {getInitials(selectedApplicant.applicant.name)}
+                                    {getInitials(selectedInquiry.renter.name)}
                                 </span>
                             </div>
                         )}
                         <h4 className="mt-4 text-xl font-semibold text-gray-900">
-                            {selectedApplicant.applicant.name}
+                            {selectedInquiry.renter.name}
                         </h4>
-                        <p className="text-gray-600">{selectedApplicant.applicant.email}</p>
+                        <p className="text-gray-600">{selectedInquiry.renter.email}</p>
                     </div>
 
                     <div className="space-y-4">
                         <div className="bg-gray-50 rounded-lg p-4">
                             <h5 className="font-medium text-gray-900 mb-2">
-                                Applied Position
+                                Listing
                             </h5>
-                            <p className="text-gray-700">{selectedApplicant.job.title}</p>
-                            <p className="text-gray-600 text-sm mt-1">
-                                {selectedApplicant.job.location} * {selectedApplicant.job.type}
-                            </p>
+                            <p className="text-gray-700">{selectedInquiry.listing.title}</p>
+                            <div className="mt-2 space-y-1 text-gray-600 text-sm">
+                                <p className="flex items-center gap-2">
+                                    <MapPin className="h-4 w-4" />
+                                    {selectedInquiry.listing.location}
+                                </p>
+                                <p className="flex items-center gap-2">
+                                    <Users className="h-4 w-4" />
+                                    {selectedInquiry.listing.roomType} * {selectedInquiry.listing.availableBeds || 0} beds
+                                </p>
+                                <p className="flex items-center gap-2">
+                                    <Coins className="h-4 w-4" />
+                                    {formatCurrency(selectedInquiry.listing.monthlyRent)}/month
+                                </p>
+                            </div>
                         </div>
 
                         <div className="bg-gray-50 rounded-lg p-4">
                             <h5 className="font-medium text-gray-900 mb-2">
-                                Application Details
+                                Background Check Document
+                            </h5>
+                            {selectedInquiry.renter.backgroundCheckDocument ? (
+                                <a
+                                    href={selectedInquiry.renter.backgroundCheckDocument}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+                                >
+                                    <FileText className="h-4 w-4" />
+                                    <span>Open uploaded document</span>
+                                    <ExternalLink className="h-4 w-4" />
+                                </a>
+                            ) : (
+                                <p className="text-sm text-gray-500">No document uploaded.</p>
+                            )}
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4">
+                            <h5 className="font-medium text-gray-900 mb-2">
+                                Inquiry Details
                             </h5>
                             <div className="space-y-2">
                                 <div className="flex justify-between">
@@ -101,27 +134,18 @@ const ApplicantProfilePreview = ({
                                     <StatusBadge status={currentStatus} />
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">Applied Date:</span>
+                                    <span className="text-gray-600">Inquiry date:</span>
                                     <span className="text-gray-900">
-                                        {moment(selectedApplicant.createdAt)?.format("Do MM YYYY")}
+                                        {moment(selectedInquiry.createdAt)?.format("Do MM YYYY")}
                                     </span>
                                 </div>
                             </div>
                         </div>
-                        <button
-                            onClick={() =>
-                                handleDownloadResume(selectedApplicant.applicant.resume)
-                            }
-                            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            <Download className="h-4 w-4" />
-                            Download Resume
-                        </button>
 
                         {/*status dropdown */}
                         <div className="mt-4">
                             <label className="block mb-1 text-sm text-gray-700 font-medium">
-                                Change Application Status
+                                Change Inquiry Status
                             </label>
                             <select
                                 value={currentStatus}
@@ -146,4 +170,4 @@ const ApplicantProfilePreview = ({
     )
 }
 
-export default ApplicantProfilePreview
+export default InquiryPreview;

@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const analyticsSchema = new mongoose.Schema(
     {
-        employer: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
-        totalJobsPosted: {type: Number, default: 0},
-        totalApplicationsReceived: {type: Number, default: 0},
-        totalHired: {type: Number, default: 0},
+        owner: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
+        totalListingsPosted: {type: Number, default: 0},
+        totalInquiriesReceived: {type: Number, default: 0},
+        totalConfirmed: {type: Number, default: 0},
     },
     {
         timestamps: true,

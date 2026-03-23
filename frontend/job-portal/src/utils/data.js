@@ -1,105 +1,102 @@
 import {
     Search,
     Users,
-    FileText,
+    BedDouble,
     MessageSquare,
     BarChart3,
     Shield,
-    Clock,
-    Award,
+    House,
     Briefcase,
     Building2,
     LayoutDashboard,
-    Plus
+    Plus,
+    ClipboardList,
 } from 'lucide-react';
 
-export const jobSeekerFeatures =[
+export const renterFeatures = [
     {
         icon: Search,
-        title: "Ухаалаг ажил хайлт",
+        title: "Search by Location",
         description: 
-        "хиймэл оюун ухаанд суурилсан ажил хайлтын систем ашиглан таны ур чадвар, туршлага, сонирхолд нийцсэн ажлын байр санал болгоно."
+        "Filter listings by area, room type, and budget to find the right hostel faster."
     },
     {
-        icon: FileText,
-        title: "CV бүтээгч",
+        icon: BedDouble,
+        title: "Clear Room Details",
         description: 
-        "мэргэжлийн загварууд болон хялбар засварлах хэрэгслүүдийг ашиглан оновчтой CV үүсгэнэ."
+        "Compare monthly rent, deposit, bed availability, amenities, and house rules in one place."
     },
     {
         icon: MessageSquare,
-        title: "Хялбар харилцаа",
+        title: "One-Click Inquiry",
         description:
-        "ажлын байрны зарлагчидтай шууд мессежээр холбогдох боломжийг олгоно."
-    },
-    {
-        icon: Award,
-        title: "Ур чадварын батламж",
-        description:
-        "өөрийн ур чадварыг албан ёсны тестээр баталгаажуулж, ажил олгогчдод өөрийгөө илүү сайн танилцуулах боломжийг олгоно."
-    }
-];
-
-export const employerFeatures = [
-    {
-        icon: Users,
-        title: "Talent Pool Access",
-        description:
-        "Access our vast database of pre-screened candidates and find perfect fit for your team."
-    },
-    {
-        icon: BarChart3,
-        title: "Analytics Dashboard",
-        description:
-        "Track your hiring performance with detailed analytics and insights on candidate engagement."
+        "Send an inquiry instantly on any listing and wait for the owner to follow up."
     },
     {
         icon: Shield,
-        title: "Verified Candidates",
+        title: "More Trustworthy Choices",
         description:
-        "All candidates undergo background verification to ensure you're hiring trustworthy professionals."
+        "Review hostel branding, photos, rules, and essential details in a consistent layout."
+    }
+];
+
+export const ownerFeatures = [
+    {
+        icon: House,
+        title: "Listing Control",
+        description:
+        "Post, edit, close, and reopen hostel listings from one owner dashboard."
     },
     {
-        icon: Clock,
-        title: "Quick Hiring",
+        icon: BarChart3,
+        title: "Inquiry Tracking",
         description:
-        "Streamlined hiring process reduces time-to-hire by 60% with automated screening tools."
+        "Track total inquiries, recent interest, and confirmed renters without leaving the dashboard."
+    },
+    {
+        icon: Users,
+        title: "Renter Pipeline",
+        description:
+        "Review each renter inquiry, update statuses, and keep listing demand organized."
+    },
+    {
+        icon: Building2,
+        title: "Hostel Branding",
+        description:
+        "Maintain your hostel name, description, logo, and listing presentation in one place."
     },
 ];
 
 // Navigation items configurations
 export const NAVIGATION_MENU=[
-    {id: "employer-dashboard", name:"Dashboard", icon: LayoutDashboard },
-    {id: "post-job", name:"Post Job", icon: Plus },
-    {id: "manage-jobs", name: "Manage Jobs", icon: Briefcase},
-    {id: "company-profile", name: "Company Profile", icon: Building2},
+    {id: "owner-dashboard", name:"Dashboard", icon: LayoutDashboard },
+    {id: "post-listing", name:"Post Listing", icon: Plus },
+    {id: "manage-listings", name: "Manage Listings", icon: ClipboardList},
+    {id: "inquiries", name: "Inquiries", icon: Users},
+    {id: "owner-profile", name: "Hostel Profile", icon: Building2},
 ];
 
-//categories and job types
 export const CATEGORIES = [
-    {value: "Engineering", label: "Engineering"},
-    {value: "Design", label: "Design"},
-    {value: "Marketing", label: "Marketing"},
-    {value: "Sales", label: "Sales"},
-    {value: "IT & Software", label: "IT & Software"},
-    {value: "Customer Support", label: "Customer Support"},
-    {value: "Product", label: "Product"},
-    {value: "Operations", label: "Operations"},
-    {value: "Finance", label: "Finance"},
-    {value: "HR", label: "HR"},
-    {value: "Other", label: "Other"},
+    {value: "Student", label: "Student"},
+    {value: "Worker", label: "Worker"},
+    {value: "Female Only", label: "Female Only"},
+    {value: "Male Only", label: "Male Only"},
+    {value: "Mixed", label: "Mixed"},
 ];
 
-export const JOB_TYPES = [
-    {value: "Remote", label: "Remote"},
-    {value: "Full-Time", label: "Full-Time"},
-    {value: "Part-Time", label: "Part-Time"},
-    {value: "Contract", label: "Contract"},
-    {value: "Internship", label: "Internship"},
+export const ROOM_TYPES = [
+    {value: "Dorm Bed", label: "Dorm Bed"},
+    {value: "Shared Room", label: "Shared Room"},
+    {value: "Private Room", label: "Private Room"},
 ];
 
-export const SALARY_RANGES = [
-    "Less than $1000",
-    "$1000 - $15000",
-    "More than $15000",
+export const AMENITY_OPTIONS = [
+    { value: "Wifi", label: "Wi-Fi" },
+    { value: "Laundry", label: "Laundry" },
+    { value: "Kitchen", label: "Shared Kitchen" },
+    { value: "Shower", label: "Hot Shower" },
+    { value: "Security", label: "24/7 Security" },
+    { value: "Parking", label: "Parking" },
+    { value: "Breakfast", label: "Breakfast" },
+    { value: "Locker", label: "Locker" },
 ];
