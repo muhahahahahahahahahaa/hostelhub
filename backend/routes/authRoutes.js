@@ -6,7 +6,7 @@ const upload = require("../middlewares/uploadMiddleware");
 
 const router = express.Router();
 const buildUploadUrl = (req, file) =>
-    `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
+    `/uploads/${file.filename}`;
 
 router.post("/register", register);
 router.post("/login", login);
@@ -29,10 +29,14 @@ router.post("/upload-file", upload.single("file"), (req, res) => {
         return res.status(400).json({ message: "no file uploaded" });
     }
 
-    const allowedFileTypes = ["application/pdf", "image/png"];
+    const allowedFileTypes = [
+        "application/pdf",
+        "image/png",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
     if (!allowedFileTypes.includes(req.file.mimetype)) {
         return res.status(400).json({
-            message: "Only PDF or PNG files are allowed",
+            message: "Only PDF, PNG, or DOCX files are allowed",
         });
     }
 

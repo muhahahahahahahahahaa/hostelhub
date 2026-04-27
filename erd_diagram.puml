@@ -1,0 +1,123 @@
+@startuml hostelhub_erd
+
+entity "User" as user {
+  *_id: ObjectId <<PK>>
+  --
+  name: String
+  email: String <<UNIQUE>>
+  password: String (hashed)
+  role: ENUM(renter, owner)
+  avatar: String
+  backgroundCheckDocument: String
+  leaseAgreementTemplate: String
+  leaseAgreementTemplateName: String
+  leaseAgreementTemplates: Array
+    ├─ name: String
+    ├─ url: String
+    ├─ content: String
+    └─ isDefault: Boolean
+  hostelName: String
+  hostelDescription: String
+  hostelLogo: String
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
+
+entity "Listing" as listing {
+  *_id: ObjectId <<PK>>
+  --
+  title: String
+  description: String
+  houseRules: String
+  location: String
+  category: ENUM(Student, Worker, Female Only, Male Only, Mixed)
+  roomType: ENUM(Dorm Bed, Shared Room, Private Room)
+  owner: ObjectId <<FK to User>>
+  monthlyRent: Number
+  deposit: Number
+  availableBeds: Number
+  amenities: Array<String>
+  images: Array<String>
+  leaseTemplateName: String
+  leaseTemplateUrl: String
+  leaseTemplateContent: String
+  isClosed: Boolean
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
+
+entity "Inquiry" as inquiry {
+  *_id: ObjectId <<PK>>
+  --
+  listing: ObjectId <<FK to Listing>>
+  renter: ObjectId <<FK to User>>
+  ownerAgreementDetails: Object
+    ├─ fullName: String
+    ├─ phoneNumber: String
+    ├─ signatureDataUrl: String
+    └─ completedAt: Date
+  renterAgreementDetails: Object
+    ├─ fullName: String
+    ├─ phoneNumber: String
+    ├─ signatureDataUrl: String
+    └─ completedAt: Date
+  status: ENUM(New, Contacted, Confirmed, Declined)
+  agreementAcceptedAt: Date
+  createdAt: Timestamp
+  updatedAt: Timestamp
+  <<unique index: {listing, renter}>>
+}
+
+entity "SavedListing" as savedlisting {
+  *_id: ObjectId <<PK>>
+  --
+  renter: ObjectId <<FK to User>>
+  listing: ObjectId <<FK to Listing>>
+  createdAt: Timestamp
+  updatedAt: Timestamp
+  <<unique index: {renter, listing}>>
+}
+
+entity "Chat" as chat {
+  *_id: ObjectId <<PK>>
+  --
+  listing: ObjectId <<FK to Listing>>
+  owner: ObjectId <<FK to User>>
+  renter: ObjectId <<FK to User>>
+  messages: Array<ChatMessage>
+    ├─ sender: ObjectId <<FK to User>>
+    ├─ text: String
+    └─ timestamps
+  lastMessage: String
+  lastMessageAt: Date
+  ownerUnreadCount: Number
+  renterUnreadCount: Number
+  createdAt: Timestamp
+  updatedAt: Timestamp
+  <<unique index: {listing, renter}>>
+  <<index: {owner, lastMessageAt}>>
+  <<index: {renter, lastMessageAt}>>
+}
+
+entity "Analytics" as analytics {
+  *_id: ObjectId <<PK>>
+  --
+  owner: ObjectId <<FK to User>>
+  totalListingsPosted: Number
+  totalInquiriesReceived: Number
+  totalConfirmed: Number
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
+
+"User" ||--o{ "Listing" : owns
+"User" ||--o{ "Inquiry" : makes_as_renter
+"Listing" ||--o{ "Inquiry" : receives
+"User" ||--o{ "SavedListing" : saves
+"Listing" ||--o{ "SavedListing" : saved_by
+"User" ||--o{ "Chat" : participates_as_owner
+"User" ||--o{ "Chat" : participates_as_renter
+"Listing" ||--o{ "Chat" : has_conversations
+"User" ||--o{ "Analytics" : tracks
+
+@enduml

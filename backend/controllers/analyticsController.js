@@ -1,5 +1,6 @@
 const Listing = require("../models/Listing");
 const Inquiry = require("../models/Inquiry");
+const Chat = require("../models/Chat");
 
 const getTrend = (current, previous) => {
     if (previous === 0) {
@@ -35,6 +36,13 @@ exports.getOwnerAnalytics = async (req, res) => {
         const totalConfirmed = await Inquiry.countDocuments({
             listing: { $in: listingIds },
             status: "Confirmed",
+        });
+        const totalChats = await Chat.countDocuments({
+            owner: ownerId,
+        });
+        const unreadChats = await Chat.countDocuments({
+            owner: ownerId,
+            ownerUnreadCount: { $gt: 0 },
         });
 
         const activeListingsLast7 = await Listing.countDocuments({
@@ -74,34 +82,58 @@ exports.getOwnerAnalytics = async (req, res) => {
         });
 
         const confirmedTrend = getTrend(confirmedLast7, confirmedPrev7);
+        const chatsLast7 = await Chat.countDocuments({
+            owner: ownerId,
+            updatedAt: { $gte: last7Days, $lte: now },
+        });
+
+        const chatsPrev7 = await Chat.countDocuments({
+            owner: ownerId,
+            updatedAt: { $gte: prev7Days, $lt: last7Days },
+        });
+
+        const chatTrend = getTrend(chatsLast7, chatsPrev7);
 
         const recentListings = await Listing.find({ owner: ownerId })
             .sort({ createdAt: -1 })
-            .limit(5)
+            .limit(3)
             .select("title location roomType createdAt isClosed");
 
         const recentInquiries = await Inquiry.find({
             listing: { $in: listingIds },
         })
             .sort({ createdAt: -1 })
-            .limit(5)
+            .limit(3)
             .populate("renter", "name email avatar")
             .populate("listing", "title");
+
+        const recentChats = await Chat.find({
+            owner: ownerId,
+        })
+            .sort({ lastMessageAt: -1, updatedAt: -1 })
+            .limit(5)
+            .populate("renter", "name email avatar")
+            .populate("listing", "title")
+            .select("listing renter lastMessage lastMessageAt ownerUnreadCount updatedAt");
 
         res.json({
             counts: {
                 totalActiveListings,
                 totalInquiries,
                 totalConfirmed,
+                totalChats,
+                unreadChats,
                 trends: {
                     activeListings: activeListingsTrend,
                     totalInquiries: inquiryTrend,
                     totalConfirmed: confirmedTrend,
+                    totalChats: chatTrend,
                 },
             },
             data: {
                 recentListings,
                 recentInquiries,
+                recentChats,
             },
         });
     } catch (err) {

@@ -1,0 +1,186 @@
+@startuml hostelhub_deployment
+
+!define AWSPUML https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v14.0/dist
+!include AWSPUML/AWSCommon.puml
+
+skinparam linetype ortho
+
+artifact "Client Devices" as clients {
+    node "Web Browser" as web_browser {
+        component "React App" as react_app
+    }
+    node "Mobile Device" as mobile_device {
+        component "Mobile App" as mobile_app
+    }
+}
+
+artifact "CDN & Reverse Proxy" as cdn {
+    node "CloudFlare / CDN" as cloudflare {
+        component "Static Assets Cache" as assets_cache
+        component "SSL/TLS Certificate" as ssl
+    }
+}
+
+artifact "Load Balancing Layer" as lb_layer {
+    node "Load Balancer" as load_balancer {
+        component "NGINX / AWS ELB" as lb_component
+    }
+}
+
+artifact "Application Servers" as app_servers {
+    node "API Server 1" as api_1 {
+        component "Node.js/Express" as nodejs_1
+        component "Auth Service" as auth_1
+        component "Controllers" as controllers_1
+    }
+    node "API Server 2" as api_2 {
+        component "Node.js/Express" as nodejs_2
+        component "Auth Service" as auth_2
+        component "Controllers" as controllers_2
+    }
+    node "API Server 3" as api_3 {
+        component "Node.js/Express" as nodejs_3
+        component "Auth Service" as auth_3
+        component "Controllers" as controllers_3
+    }
+}
+
+artifact "Cache Layer" as cache_layer {
+    node "Redis Cache" as redis {
+        component "Session Store" as session_store
+        component "Query Cache" as query_cache
+    }
+}
+
+artifact "Database Layer" as db_layer {
+    node "MongoDB Replica Set" as mongo_replica {
+        node "Primary Node" as mongo_primary {
+            component "User Collection" as users_coll
+            component "Listing Collection" as listing_coll
+            component "Inquiry Collection" as inquiry_coll
+            component "Chat Collection" as chat_coll
+            component "Analytics Collection" as analytics_coll
+        }
+        node "Secondary Node 1" as mongo_secondary_1 {
+            component "Data Replica" as replica_1
+        }
+        node "Secondary Node 2" as mongo_secondary_2 {
+            component "Data Replica" as replica_2
+        }
+    }
+}
+
+artifact "Background Jobs & Services" as services {
+    node "Job Queue Server" as job_queue {
+        component "Email Service" as email_service
+        component "Image Processing" as image_processing
+        component "Analytics Calculator" as analytics_calc
+    }
+}
+
+artifact "File Storage" as file_storage {
+    node "Cloud Storage" as cloud_storage {
+        component "AWS S3 / GCS" as s3_storage {
+            component "User Avatars" as avatars_storage
+            component "Listing Images" as images_storage
+            component "Documents" as docs_storage
+        }
+    }
+}
+
+artifact "External Services" as external {
+    node "Email Provider" as email_provider {
+        component "SendGrid / NodeMailer" as email_server
+    }
+    node "SMS Service" as sms_service {
+        component "Twilio / Local SMS" as sms_server
+    }
+}
+
+artifact "Monitoring & Logging" as monitoring {
+    node "Monitoring Stack" as monitor {
+        component "Prometheus" as prometheus
+        component "Grafana" as grafana
+        component "ELK Stack" as elk
+    }
+}
+
+artifact "CI/CD Pipeline" as cicd {
+    node "Git Repository" as git_repo {
+        component "GitHub / GitLab" as git_service
+    }
+    node "CI/CD Server" as ci_server {
+        component "Docker Build" as docker_build
+        component "Tests" as tests
+        component "Deployment" as deployment_service
+    }
+}
+
+'Connections
+
+web_browser --> cloudflare
+mobile_device --> cloudflare
+
+cloudflare --> load_balancer
+
+load_balancer --> api_1
+load_balancer --> api_2
+load_balancer --> api_3
+
+api_1 --> redis
+api_2 --> redis
+api_3 --> redis
+
+api_1 --> mongo_primary
+api_2 --> mongo_primary
+api_3 --> mongo_primary
+
+mongo_primary --> mongo_secondary_1
+mongo_primary --> mongo_secondary_2
+
+api_1 --> job_queue
+api_2 --> job_queue
+api_3 --> job_queue
+
+job_queue --> email_provider
+job_queue --> s3_storage
+
+api_1 --> s3_storage
+api_2 --> s3_storage
+api_3 --> s3_storage
+
+redis --> monitoring
+api_1 --> monitoring
+mongo_primary --> monitoring
+
+git_repo --> ci_server
+ci_server --> deployment_service
+deployment_service --> api_1
+deployment_service --> api_2
+deployment_service --> api_3
+
+note right of redis
+  Session persistence
+  Token blacklist
+  Query caching
+end note
+
+note right of mongo_replica
+  Data Replication for HA
+  Automatic Failover
+  Backup & Recovery
+end note
+
+note bottom of app_servers
+  Horizontal Scaling
+  Auto-scaling based on load
+  Rolling deployments
+end note
+
+note bottom of external
+  Third-party integrations
+  Email notifications
+  SMS alerts
+end note
+
+@enduml

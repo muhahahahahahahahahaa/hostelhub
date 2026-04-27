@@ -1,6 +1,16 @@
 const mongoose = require("mongoose")
 const bcrypt = require("bcryptjs")
 
+const leaseTemplateSchema = new mongoose.Schema(
+    {
+        name: { type: String, required: true, trim: true },
+        url: { type: String, trim: true, default: "" },
+        content: { type: String, trim: true, default: "" },
+        isDefault: { type: Boolean, default: false },
+    },
+    { _id: true, timestamps: true }
+);
+
 const userSchema = new mongoose.Schema({
     name: {type: String, required: true},
     email: {type: String, required:true, unique: true},
@@ -8,6 +18,12 @@ const userSchema = new mongoose.Schema({
     role: {type: String, enum: ["renter", "owner"], required: true},
     avatar: String,
     backgroundCheckDocument: String,
+    leaseAgreementTemplate: String,
+    leaseAgreementTemplateName: String,
+    leaseAgreementTemplates: {
+        type: [leaseTemplateSchema],
+        default: [],
+    },
     hostelName: String,
     hostelDescription: String,
     hostelLogo: String,

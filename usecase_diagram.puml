@@ -1,0 +1,52 @@
+@startuml hostelhub_usecase
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor Guest
+actor Host
+actor Admin
+
+package HostelHub {
+  usecase "View Listings" as ViewListings
+  usecase "Search Hostels" as Search
+  usecase "Book Hostel" as BookHostel
+  usecase "Make Inquiry" as MakeInquiry
+  usecase "View Booking Details" as ViewBooking
+  usecase "Cancel Booking" as CancelBooking
+
+  usecase "Create Listing" as CreateListing
+  usecase "Edit Listing" as EditListing
+  usecase "Upload Images" as UploadImages
+  usecase "View Inquiries" as ViewInquiries
+  usecase "Respond to Inquiry" as RespondInquiry
+
+  usecase "Manage Users" as ManageUsers
+  usecase "View Analytics" as ViewAnalytics
+  usecase "Manage Listings" as ManageListing
+  usecase "View Reports" as ViewReports
+}
+
+Guest --> ViewListings
+Guest --> Search
+Guest --> BookHostel
+Guest --> MakeInquiry
+Guest --> ViewBooking
+Guest --> CancelBooking
+
+Host --> CreateListing
+Host --> EditListing
+Host --> UploadImages
+Host --> ViewInquiries
+Host --> RespondInquiry
+
+Admin --> ManageUsers
+Admin --> ViewAnalytics
+Admin --> ManageListing
+Admin --> ViewReports
+
+BookHostel .> MakeInquiry : extends
+RespondInquiry .> MakeInquiry : includes
+ViewBooking .> BookHostel : includes
+
+@enduml

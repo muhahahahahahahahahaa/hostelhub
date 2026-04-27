@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const { getOwnerLeaseTemplates } = require("../utils/leaseTemplates");
 
 const generateToken = (id) => {
     if (!process.env.JWT_SECRET) {
@@ -22,6 +23,13 @@ exports.register = async (req, res) => {
         }
 
         const user = new User({ name, email, password, role, avatar });
+
+        if (role === "owner") {
+            user.leaseAgreementTemplates = getOwnerLeaseTemplates(user, req);
+            user.leaseAgreementTemplate = user.leaseAgreementTemplates[0]?.url || "";
+            user.leaseAgreementTemplateName = user.leaseAgreementTemplates[0]?.name || "";
+        }
+
         await user.save();
 
         res.status(201).json({
@@ -30,6 +38,7 @@ exports.register = async (req, res) => {
             email: user.email,
             avatar: user.avatar,
             backgroundCheckDocument: user.backgroundCheckDocument || "",
+            leaseAgreementTemplates: getOwnerLeaseTemplates(user, req),
             role: user.role,
             token: generateToken(user._id),
             hostelName: user.hostelName || "",
@@ -59,6 +68,7 @@ exports.login = async (req, res) => {
             token: generateToken(user._id),
             avatar: user.avatar || "",
             backgroundCheckDocument: user.backgroundCheckDocument || "",
+            leaseAgreementTemplates: getOwnerLeaseTemplates(user, req),
             hostelName: user.hostelName || "",
             hostelDescription: user.hostelDescription || "",
             hostelLogo: user.hostelLogo || "",
@@ -69,5 +79,12 @@ exports.login = async (req, res) => {
 };
 
 exports.getMe = async (req, res) => {
+    if (req.user?.role === "owner") {
+        return res.json({
+            ...req.user.toObject(),
+            leaseAgreementTemplates: getOwnerLeaseTemplates(req.user, req),
+        });
+    }
+
     res.json(req.user);
 };

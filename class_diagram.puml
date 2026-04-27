@@ -1,0 +1,82 @@
+@startuml hostelhub_class
+
+class User {
+  - userId: String
+  - name: String
+  - email: String
+  - password: String
+  - phone: String
+  - role: String (Guest/Host/Admin)
+  - profileImage: String
+  - address: String
+  - createdAt: Date
+  - updatedAt: Date
+  +register()
+  +login()
+  +updateProfile()
+  +uploadImage()
+}
+
+class Listing {
+  - listingId: String
+  - hostId: String (FK User)
+  - title: String
+  - description: String
+  - location: String
+  - pricePerNight: Number
+  - capacity: Number
+  - amenities: Array
+  - images: Array
+  - rating: Number
+  - reviews: Number
+  - available: Boolean
+  - createdAt: Date
+  - updatedAt: Date
+  +createListing()
+  +updateListing()
+  +uploadImages()
+  +deleteListing()
+  +getAvailability()
+}
+
+class Inquiry {
+  - inquiryId: String
+  - guestId: String (FK User)
+  - listingId: String (FK Listing)
+  - checkInDate: Date
+  - checkOutDate: Date
+  - numberOfGuests: Number
+  - status: String (Pending/Accepted/Rejected/Booked)
+  - message: String
+  - response: String
+  - createdAt: Date
+  - updatedAt: Date
+  +makeInquiry()
+  +respondToInquiry()
+  +acceptInquiry()
+  +rejectInquiry()
+  +cancelInquiry()
+}
+
+class Analytics {
+  - analyticsId: String
+  - hostId: String (FK User)
+  - listingId: String (FK Listing)
+  - totalBookings: Number
+  - totalRevenue: Number
+  - averageRating: Number
+  - viewCount: Number
+  - inquiryCount: Number
+  - period: String (Monthly/Yearly)
+  - createdAt: Date
+  +generateReport()
+  +getAnalytics()
+}
+
+User "1" -- "*" Listing : hosts
+User "1" -- "*" Inquiry : makes
+Listing "1" -- "*" Inquiry : has
+Listing "1" -- "*" Analytics : tracked
+User "1" -- "*" Analytics : owns
+
+@enduml

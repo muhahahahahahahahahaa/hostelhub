@@ -3,6 +3,7 @@ const {
     createListing,
     getListings,
     getListingById,
+    getListingTemplatePreview,
     updateListing,
     deleteListing,
     toggleListingStatus,
@@ -14,6 +15,7 @@ const router = express.Router();
 
 router.route("/").post(protect, createListing).get(getListings);
 router.get("/owner", protect, getOwnerListings);
+router.get("/:id/template-preview", getListingTemplatePreview);
 router
     .route("/:id")
     .get(getListingById)
