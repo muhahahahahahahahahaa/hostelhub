@@ -1,7 +1,10 @@
 import { Building2 } from "lucide-react";
 import moment from "moment";
+import { usePreferences } from "../../context/PreferencesContext";
 
 const ListingDashboardCard = ({ listing, onClick }) => {
+  const { t } = usePreferences();
+
   return (
     <button
       type="button"
@@ -27,7 +30,7 @@ const ListingDashboardCard = ({ listing, onClick }) => {
                         : "bg-gray-100 text-gray-600"
                 }`}
             >
-                {listing.isClosed ? "Closed" : "Active"}
+                {listing.isClosed ? t("closed") : t("active")}
             </span>
         </div>
     </button>

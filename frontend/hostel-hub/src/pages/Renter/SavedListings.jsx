@@ -55,13 +55,13 @@ const SavedListings = () => {
   const handleUnsaveListing = async (listingId) => {
     try {
       await axiosInstance.delete(API_PATHS.SAVED_LISTINGS.UNSAVE(listingId));
-      toast.success("Listing removed from saved items.");
+      toast.success("Зарыг хадгалсан жагсаалтаас хаслаа.");
 
       const response = await axiosInstance.get(API_PATHS.SAVED_LISTINGS.GET_MINE);
       setSavedListingList(response.data);
     } catch (error) {
       console.error("Error removing saved listing:", error);
-      toast.error("Failed to refresh saved listings.");
+      toast.error("Хадгалсан заруудыг шинэчилж чадсангүй.");
     }
   };
 
@@ -72,20 +72,20 @@ const SavedListings = () => {
     }
 
     if (user.role !== "renter") {
-      toast.error("Only renter accounts can send inquiries.");
+      toast.error("Зөвхөн түрээслэгч бүртгэл хүсэлт илгээх боломжтой.");
       return;
     }
 
     try {
       await axiosInstance.post(API_PATHS.INQUIRIES.CREATE(listingId));
-      toast.success("Inquiry sent successfully.");
+      toast.success("Хүсэлт амжилттай илгээгдлээ.");
 
       const response = await axiosInstance.get(API_PATHS.SAVED_LISTINGS.GET_MINE);
       setSavedListingList(response.data);
     } catch (error) {
       console.error("Error sending inquiry from saved listings:", error);
       toast.error(
-        error?.response?.data?.message || "Failed to send inquiry.",
+        error?.response?.data?.message || "Хүсэлт илгээж чадсангүй.",
       );
     }
   };
@@ -97,7 +97,7 @@ const SavedListings = () => {
     }
 
     if (user.role !== "renter") {
-      toast.error("Only renter accounts can start listing chats.");
+      toast.error("Зөвхөн түрээслэгч бүртгэл чат эхлүүлэх боломжтой.");
       return;
     }
 
@@ -121,7 +121,7 @@ const SavedListings = () => {
               </button>
 
               <h1 className="text-lg lg:text-xl font-semibold leading-tight text-gray-900">
-                Saved Listings
+                Хадгалсан зарууд
               </h1>
             </div>
 
@@ -154,24 +154,24 @@ const SavedListings = () => {
           </div>
 
           {loading ? (
-            <div className="py-10 text-center text-gray-500">Loading...</div>
+            <div className="py-10 text-center text-gray-500">Ачаалж байна...</div>
           ) : savedListingList.length === 0 ? (
             <div className="text-center py-16 lg:py-20 bg-white/60 backdrop-blur-xl rounded-2xl border border-white/20">
               <div className="text-gray-300 mb-6">
                 <Bookmark className="w-16 h-16 mx-auto" />
               </div>
               <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3">
-                You have not saved any listings yet
+                Та одоогоор зар хадгалаагүй байна
               </h3>
               <p className="text-gray-600 mb-6">
-                Save the hostels you like so you can review them later.
+                Таалагдсан хостелуудаа хадгалж дараа нь дахин хараарай.
               </p>
               <button
                 type="button"
                 onClick={() => navigate(ROUTES.FIND_HOSTELS)}
                 className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors"
               >
-                Browse Listings
+                Зар хайх
               </button>
             </div>
           ) : (

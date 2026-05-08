@@ -14,7 +14,7 @@ const notificationSchema = new mongoose.Schema(
         },
         reminderKind: {
             type: String,
-            enum: ["ending_soon", "ending_today", ""],
+            enum: ["ending_soon", "ending_today", "review_available", ""],
             default: "",
         },
         reminderDateKey: {
@@ -63,6 +63,17 @@ notificationSchema.index(
         unique: true,
         partialFilterExpression: {
             reminderKind: { $in: ["ending_soon", "ending_today"] },
+            reminderDateKey: { $exists: true, $ne: "" },
+        },
+    }
+);
+notificationSchema.index(
+    { recipient: 1, inquiry: 1, reminderKind: 1, reminderDateKey: 1, type: 1 },
+    {
+        unique: true,
+        name: "unique_review_available_notification",
+        partialFilterExpression: {
+            reminderKind: "review_available",
             reminderDateKey: { $exists: true, $ne: "" },
         },
     }

@@ -11,7 +11,7 @@ const LoadingSpinner = () => {
                 </div>
             </div>
             <p className="text-gray-600 font-medium">
-                Finding amazing opportunities...
+                Тохирох хостелүүдийг хайж байна...
             </p>
         </div>
     </div>

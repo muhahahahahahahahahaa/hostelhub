@@ -25,6 +25,7 @@ import ListingPreview from "../../components/Cards/ListingPreview";
 import { ROUTES } from "../../utils/routePaths";
 import uploadImage from "../../utils/uploadImage";
 import { useAuth } from "../../context/AuthContext";
+import { usePreferences } from "../../context/PreferencesContext";
 
 const INITIAL_FORM = {
   title: "",
@@ -85,6 +86,7 @@ const parseTemplateContentToSections = (content = "") => {
 
 const ListingForm = () => {
   const { user } = useAuth();
+  const { language, t } = usePreferences();
   const navigate = useNavigate();
   const location = useLocation();
   const listingId = location.state?.listingId || location.state?.jobId || null;
@@ -149,7 +151,7 @@ const ListingForm = () => {
         }
       } catch (error) {
         console.error("Error fetching listing details", error);
-        toast.error("Failed to load listing details.");
+        toast.error(language === "en" ? "Failed to load listing details." : "Зарын мэдээлэл ачаалж чадсангүй.");
       } finally {
         if (isMounted) {
           setIsFetching(false);
@@ -162,7 +164,7 @@ const ListingForm = () => {
     return () => {
       isMounted = false;
     };
-  }, [listingId]);
+  }, [language, listingId]);
 
   useEffect(() => {
     if (listingId || formData.leaseTemplateName || formData.leaseTemplateUrl) {
@@ -203,7 +205,7 @@ const ListingForm = () => {
     }
 
     if (!templatePreviewSource?.url) {
-      toast.error("No template source file is available for preview.");
+      toast.error(language === "en" ? "No agreement source file is available for preview." : "Урьдчилж харах гэрээний эх файл алга.");
       return;
     }
 
@@ -231,7 +233,7 @@ const ListingForm = () => {
       setShowTemplatePreview(true);
     } catch (error) {
       console.error("Template preview failed", error);
-      toast.error(error?.response?.data?.message || "Failed to load template preview.");
+      toast.error(error?.response?.data?.message || (language === "en" ? "Failed to load agreement preview." : "Гэрээний урьдчилсан харагдац ачаалж чадсангүй."));
     } finally {
       setIsTemplatePreviewLoading(false);
     }
@@ -268,12 +270,12 @@ const ListingForm = () => {
 
       toast.success(
         uploadedUrls.length === 1
-          ? "Listing image uploaded."
-          : `${uploadedUrls.length} listing images uploaded.`,
+          ? language === "en" ? "Listing image uploaded." : "Зарын зураг оруулагдлаа."
+          : language === "en" ? `${uploadedUrls.length} listing images uploaded.` : `${uploadedUrls.length} зарын зураг оруулагдлаа.`,
       );
     } catch (error) {
       console.error("Error uploading listing images", error);
-      toast.error("Failed to upload listing images.");
+      toast.error(language === "en" ? "Failed to upload listing images." : "Зарын зураг оруулж чадсангүй.");
     } finally {
       setIsUploadingImages(false);
       event.target.value = "";
@@ -290,26 +292,26 @@ const ListingForm = () => {
   const validateForm = () => {
     const nextErrors = {};
 
-    if (!formData.title.trim()) nextErrors.title = "Listing title is required";
-    if (!formData.location.trim()) nextErrors.location = "Location is required";
-    if (!formData.category) nextErrors.category = "Please select a hostel category";
-    if (!formData.roomType) nextErrors.roomType = "Please select a room type";
-    if (!formData.description.trim()) nextErrors.description = "Description is required";
-    if (!formData.houseRules.trim()) nextErrors.houseRules = "House rules are required";
-    if (!formData.dailyRent) nextErrors.dailyRent = "Daily rent is required";
-    if (!formData.deposit) nextErrors.deposit = "Deposit is required";
+    if (!formData.title.trim()) nextErrors.title = language === "en" ? "Listing title is required" : "Зарын гарчиг шаардлагатай";
+    if (!formData.location.trim()) nextErrors.location = language === "en" ? "Location is required" : "Байршил шаардлагатай";
+    if (!formData.category) nextErrors.category = language === "en" ? "Select a hostel category" : "Хостелийн ангилал сонгоно уу";
+    if (!formData.roomType) nextErrors.roomType = language === "en" ? "Select a room type" : "Өрөөний төрөл сонгоно уу";
+    if (!formData.description.trim()) nextErrors.description = language === "en" ? "Description is required" : "Тайлбар шаардлагатай";
+    if (!formData.houseRules.trim()) nextErrors.houseRules = language === "en" ? "House rules are required" : "Дотоод дүрэм шаардлагатай";
+    if (!formData.dailyRent) nextErrors.dailyRent = language === "en" ? "Daily rent is required" : "Өдрийн түрээс шаардлагатай";
+    if (!formData.deposit) nextErrors.deposit = language === "en" ? "Deposit is required" : "Барьцаа шаардлагатай";
     if (!formData.availableBeds || Number(formData.availableBeds) < 1) {
-      nextErrors.availableBeds = "Available beds must be at least 1";
+      nextErrors.availableBeds = language === "en" ? "Available beds must be at least 1" : "Сул ор дор хаяж 1 байх ёстой";
     }
     if (Number(formData.dailyRent) < 0 || Number(formData.deposit) < 0) {
-      nextErrors.deposit = "Rent and deposit must be positive numbers";
+      nextErrors.deposit = language === "en" ? "Rent and deposit must be positive numbers" : "Түрээс болон барьцаа эерэг тоо байх ёстой";
     }
     if (
       formData.availableFrom &&
       formData.availableUntil &&
       formData.availableFrom > formData.availableUntil
     ) {
-      nextErrors.availableUntil = "End date must be the same as or after the start date";
+      nextErrors.availableUntil = language === "en" ? "End date must be on or after the start date" : "Дуусах өдөр эхлэх өдрөөс хойш эсвэл ижил өдөр байх ёстой";
     }
 
     return nextErrors;
@@ -351,14 +353,16 @@ const ListingForm = () => {
         : await axiosInstance.post(API_PATHS.LISTINGS.CREATE, listingPayload);
 
       if (response.status === 200 || response.status === 201) {
-        toast.success(listingId ? "Listing updated successfully." : "Listing posted successfully.");
+        toast.success(listingId
+          ? language === "en" ? "Listing updated successfully." : "Зар амжилттай шинэчлэгдлээ."
+          : language === "en" ? "Listing published successfully." : "Зар амжилттай нийтлэгдлээ.");
         setFormData(INITIAL_FORM);
         navigate(ROUTES.OWNER_DASHBOARD);
       }
       } catch (error) {
       console.error("Unexpected listing submit error", error);
       toast.error(
-        error?.response?.data?.message || "Failed to save listing.",
+        error?.response?.data?.message || (language === "en" ? "Failed to save listing." : "Зар хадгалж чадсангүй."),
       );
     } finally {
       setIsSubmitting(false);
@@ -381,11 +385,10 @@ const ListingForm = () => {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                  {listingId ? "Edit Hostel Listing" : "Post a New Hostel Listing"}
+                  {listingId ? t("editHostelListing") : t("postNewListing")}
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  Fill out the details below to publish a renter-friendly hostel listing.
-                  You can set the exact date range this room is available for rent.
+                  {t("listingFormIntro")}
                 </p>
               </div>
 
@@ -396,18 +399,18 @@ const ListingForm = () => {
                 className="group flex items-center space-x-2 px-6 py-3 text-sm font-medium text-gray-600 hover:text-white bg-white/50 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 border border-gray-200 hover:border-transparent rounded-xl transition-all duration-300 shadow-lg shadow-gray-100 hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Eye className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                <span>Preview</span>
+                <span>{t("preview")}</span>
               </button>
             </div>
 
             {isFetching ? (
-              <div className="py-10 text-center text-gray-500">Loading listing...</div>
+              <div className="py-10 text-center text-gray-500">{t("loadingListing")}</div>
             ) : (
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <InputField
-                  label="Listing Title"
+                  label={t("listingTitle")}
                   id="title"
-                  placeholder="e.g., Clean shared room near university"
+                  placeholder={language === "en" ? "e.g. Clean shared room near the university" : "жишээ: Их сургуулийн ойролцоо цэвэр хамтын өрөө"}
                   value={formData.title}
                   onChange={(event) => handleInputChange("title", event.target.value)}
                   error={errors.title}
@@ -416,9 +419,9 @@ const ListingForm = () => {
                 />
 
                 <InputField
-                  label="Location"
+                  label={t("location")}
                   id="location"
-                  placeholder="e.g., 3rd khoroo, Ulaanbaatar"
+                  placeholder={language === "en" ? "e.g. Ulaanbaatar, 3rd khoroo" : "жишээ: Улаанбаатар, 3-р хороо"}
                   value={formData.location}
                   onChange={(event) => handleInputChange("location", event.target.value)}
                   error={errors.location}
@@ -428,22 +431,22 @@ const ListingForm = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <SelectField
-                    label="Hostel Category"
+                    label={t("category")}
                     id="category"
                     value={formData.category}
                     onChange={(event) => handleInputChange("category", event.target.value)}
-                    options={CATEGORIES}
-                    placeholder="Select category"
+                    options={CATEGORIES.map((option) => ({ ...option, label: language === "en" ? option.labelEn : option.label }))}
+                    placeholder={t("selectCategory")}
                     error={errors.category}
                     required
                   />
                   <SelectField
-                    label="Room Type"
+                    label={t("roomType")}
                     id="roomType"
                     value={formData.roomType}
                     onChange={(event) => handleInputChange("roomType", event.target.value)}
-                    options={ROOM_TYPES}
-                    placeholder="Select room type"
+                    options={ROOM_TYPES.map((option) => ({ ...option, label: language === "en" ? option.labelEn : option.label }))}
+                    placeholder={t("selectRoomType")}
                     error={errors.roomType}
                     required
                   />
@@ -451,22 +454,22 @@ const ListingForm = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <InputField
-                    label="Daily Rent"
+                    label={t("dailyRent")}
                     id="dailyRent"
                     type="number"
-                    placeholder="e.g., 35000"
+                    placeholder={language === "en" ? "e.g. 35000" : "жишээ: 35000"}
                     value={formData.dailyRent}
                     onChange={(event) => handleInputChange("dailyRent", event.target.value)}
                     error={errors.dailyRent}
-                    helperText="Enter the price for one day."
+                    helperText={t("dailyRentHelper")}
                     required
                     icon={Coins}
                   />
                   <InputField
-                    label="Deposit"
+                    label={t("deposit")}
                     id="deposit"
                     type="number"
-                    placeholder="e.g., 600000"
+                    placeholder={language === "en" ? "e.g. 600000" : "жишээ: 600000"}
                     value={formData.deposit}
                     onChange={(event) => handleInputChange("deposit", event.target.value)}
                     error={errors.deposit}
@@ -474,31 +477,31 @@ const ListingForm = () => {
                     icon={Coins}
                   />
                   <InputField
-                    label="Available From"
+                    label={t("startDate")}
                     id="availableFrom"
                     type="date"
                     value={formData.availableFrom}
                     onChange={(event) => handleInputChange("availableFrom", event.target.value)}
-                    helperText="Optional start date."
+                    helperText={t("optionalStartDate")}
                     error={errors.availableFrom}
                   />
                   <InputField
-                    label="Available To"
+                    label={t("endDate")}
                     id="availableUntil"
                     type="date"
                     value={formData.availableUntil}
                     onChange={(event) => handleInputChange("availableUntil", event.target.value)}
-                    helperText="Optional end date."
+                    helperText={t("optionalEndDate")}
                     error={errors.availableUntil}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
                   <InputField
-                    label="Available Beds"
+                    label={t("availableBeds")}
                     id="availableBeds"
                     type="number"
-                    placeholder="e.g., 4"
+                    placeholder={language === "en" ? "e.g. 4" : "жишээ: 4"}
                     value={formData.availableBeds}
                     onChange={(event) => handleInputChange("availableBeds", event.target.value)}
                     error={errors.availableBeds}
@@ -509,7 +512,7 @@ const ListingForm = () => {
 
                 <div className="space-y-3">
                   <label className="block text-sm font-medium text-gray-700">
-                    Lease Agreement Template
+                    {t("leaseTemplate")}
                   </label>
                   <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                     <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3">
@@ -555,20 +558,20 @@ const ListingForm = () => {
                           >
                             <Eye className="h-4 w-4" />
                             {isTemplatePreviewLoading
-                              ? "Loading preview..."
+                              ? t("loadingPreview")
                               : showTemplatePreview
-                                ? "Hide Preview Template"
-                                : "Preview Template"}
+                                ? t("closePreview")
+                                : t("previewAgreement")}
                           </button>
                         </div>
                         <p className="text-xs text-gray-500">
-                          Choose which contract template renters will see for this listing.
+                          {t("chooseLeaseTemplate")}
                         </p>
                         <div className="grid gap-3">
                           {showTemplatePreview && templatePreviewUrl ? (
                             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-neutral-700/80 p-3">
                               <iframe
-                                title={`${formData.leaseTemplateName || "Lease template"} preview`}
+                                title={`${formData.leaseTemplateName || t("leaseTemplate")} ${t("preview")}`}
                                 src={templatePreviewUrl}
                                 className="h-[720px] w-full rounded-xl border-0 bg-white"
                               />
@@ -583,10 +586,10 @@ const ListingForm = () => {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-3">
                     <label className="block text-sm font-medium text-gray-700">
-                      Listing Images
+                      {t("listingImages")}
                     </label>
                     <span className="text-xs text-gray-500">
-                      Up to 6 JPG or PNG images
+                      {t("imageLimitText")}
                     </span>
                   </div>
 
@@ -594,7 +597,7 @@ const ListingForm = () => {
                     <div className="flex flex-col gap-4">
                       <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
                         <ImagePlus className="h-4 w-4" />
-                        <span>{isUploadingImages ? "Uploading..." : "Upload Images"}</span>
+                        <span>{isUploadingImages ? t("uploading") : t("uploadImage")}</span>
                         <input
                           type="file"
                           accept="image/png,image/jpeg,image/jpg"
@@ -614,7 +617,7 @@ const ListingForm = () => {
                             >
                               <img
                                 src={image}
-                                alt={`Listing ${index + 1}`}
+                                alt={`${t("listingImageAlt")} ${index + 1}`}
                                 className="h-28 w-full object-cover"
                               />
                               <button
@@ -629,7 +632,7 @@ const ListingForm = () => {
                         </div>
                       ) : (
                         <p className="text-sm text-gray-500">
-                          Add room and hostel photos to help renters compare listings faster.
+                          {t("addListingPhotosHint")}
                         </p>
                       )}
                     </div>
@@ -638,7 +641,7 @@ const ListingForm = () => {
 
                 <div className="space-y-3">
                   <label className="block text-sm font-medium text-gray-700">
-                    Amenities
+                    {t("amenities")}
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {AMENITY_OPTIONS.map((amenity) => {
@@ -654,7 +657,7 @@ const ListingForm = () => {
                               : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
                           }`}
                         >
-                          {amenity.label}
+                          {language === "en" ? amenity.labelEn : amenity.label}
                         </button>
                       );
                     })}
@@ -662,9 +665,9 @@ const ListingForm = () => {
                 </div>
 
                 <TextareaField
-                  label="Hostel Description"
+                  label={t("hostelDescription")}
                   id="description"
-                  placeholder="Describe the room, neighborhood, cleanliness, transport access, and who this listing suits best."
+                  placeholder={language === "en" ? "Describe the room, environment, cleanliness, transport access, and who it suits." : "Өрөө, орчин, цэвэрлэгээ, тээврийн хүртээмж, ямар хүнд тохиромжтойг тайлбарлана уу."}
                   value={formData.description}
                   onChange={(event) => handleInputChange("description", event.target.value)}
                   error={errors.description}
@@ -672,9 +675,9 @@ const ListingForm = () => {
                 />
 
                 <TextareaField
-                  label="House Rules"
+                  label={t("houseRules")}
                   id="houseRules"
-                  placeholder="e.g., No smoking, quiet hours after 11PM, deposit paid before move-in."
+                  placeholder={language === "en" ? "e.g. No smoking, quiet after 23:00, deposit before move-in." : "жишээ: Тамхи татахгүй, 23:00 цагаас хойш чимээгүй, нүүхээс өмнө барьцаа төлнө."}
                   value={formData.houseRules}
                   onChange={(event) => handleInputChange("houseRules", event.target.value)}
                   error={errors.houseRules}
@@ -685,10 +688,9 @@ const ListingForm = () => {
                   <div className="flex items-start gap-3">
                     <Sparkles className="h-5 w-5 mt-0.5" />
                     <div>
-                      <p className="font-semibold">Listing quality tip</p>
+                      <p className="font-semibold">{t("listingQualityTip")}</p>
                       <p className="mt-1">
-                        Renters convert better when daily rent, available date range, free beds,
-                        and rules are specific and easy to compare.
+                        {t("listingQualityTipBody")}
                       </p>
                     </div>
                   </div>
@@ -700,7 +702,7 @@ const ListingForm = () => {
                     onClick={() => navigate(ROUTES.MANAGE_LISTINGS)}
                     className="px-5 py-3 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
                   >
-                    Cancel
+                    {t("cancel")}
                   </button>
                   <button
                     type="submit"
@@ -710,12 +712,12 @@ const ListingForm = () => {
                     {isSubmitting ? (
                       <>
                         <Shield className="h-4 w-4 animate-pulse" />
-                        Saving...
+                        {t("saving")}
                       </>
                     ) : (
                       <>
                         <BedDouble className="h-4 w-4" />
-                        {listingId ? "Update Listing" : "Post Listing"}
+                        {listingId ? t("updateListing") : t("publishListing")}
                       </>
                     )}
                   </button>

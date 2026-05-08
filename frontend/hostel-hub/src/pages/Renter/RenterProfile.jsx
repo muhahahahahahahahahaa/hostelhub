@@ -95,7 +95,7 @@ const RenterProfile = () => {
       handleInputChange("avatar", imageUploadResponse.imageUrl || previewUrl);
     } catch (error) {
       console.error("Image upload failed", error);
-      toast.error("Failed to upload avatar.");
+      toast.error("Профайл зураг оруулж чадсангүй.");
     } finally {
       setUploadingAvatar(false);
     }
@@ -116,10 +116,10 @@ const RenterProfile = () => {
     try {
       const fileUploadResponse = await uploadFile(file);
       handleInputChange("backgroundCheckDocument", fileUploadResponse.fileUrl || "");
-      toast.success("Background check document uploaded.");
+      toast.success("Шалгалтын баримт амжилттай оруулагдлаа.");
     } catch (error) {
       console.error("Document upload failed", error);
-      toast.error("Failed to upload background check document.");
+      toast.error("Шалгалтын баримт оруулж чадсангүй.");
     } finally {
       setUploadingDocument(false);
     }
@@ -136,11 +136,11 @@ const RenterProfile = () => {
 
       if (response.status === 200) {
         updateUser(response.data);
-        toast.success("Profile updated successfully.");
+        toast.success("Профайл амжилттай шинэчлэгдлээ.");
       }
     } catch (error) {
       console.error("Profile update failed:", error);
-      toast.error("Failed to save profile.");
+      toast.error("Профайл хадгалж чадсангүй.");
     } finally {
       setSaving(false);
     }
@@ -154,7 +154,7 @@ const RenterProfile = () => {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6 flex justify-between items-center">
-              <h1 className="text-xl font-medium text-white">Renter Profile</h1>
+              <h1 className="text-xl font-medium text-white">Түрээслэгчийн профайл</h1>
             </div>
 
             <div className="p-8">
@@ -164,10 +164,10 @@ const RenterProfile = () => {
                     <div>
                       <div className="flex items-center gap-2">
                         <Bell className="h-5 w-5 text-blue-600" />
-                        <h2 className="text-base font-semibold text-gray-900">Notifications</h2>
+                        <h2 className="text-base font-semibold text-gray-900">Мэдэгдэл</h2>
                       </div>
                       <p className="mt-1 text-sm text-gray-600">
-                        Confirmed owner responses will appear here for your next step.
+                        Эзэмшигчийн баталгаажсан хариу таны дараагийн алхамд энд харагдана.
                       </p>
                     </div>
                   </div>
@@ -175,7 +175,7 @@ const RenterProfile = () => {
                   <div className="mt-4 space-y-3">
                     {loadingNotifications ? (
                       <div className="rounded-xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-500">
-                        Loading notifications...
+                        Мэдэгдэл ачаалж байна...
                       </div>
                     ) : confirmedNotifications.length > 0 ? (
                       confirmedNotifications.map((inquiry) => (
@@ -185,10 +185,10 @@ const RenterProfile = () => {
                         >
                           <div>
                             <p className="text-sm font-semibold text-emerald-700">
-                              Your request has been confirmed
+                              Таны хүсэлт баталгаажлаа
                             </p>
                             <p className="mt-1 text-sm text-slate-700">
-                              {inquiry?.listing?.title || "Listing"} is ready for agreement review.
+                              {inquiry?.listing?.title || "Зар"} гэрээ хянахад бэлэн боллоо.
                             </p>
                           </div>
 
@@ -197,13 +197,13 @@ const RenterProfile = () => {
                             onClick={() => navigate(ROUTES.RENTER_AGREEMENT_REVIEW(inquiry._id))}
                             className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
                           >
-                            Next
+                            Дараах
                           </button>
                         </div>
                       ))
                     ) : (
                       <div className="rounded-xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-500">
-                        No new notifications right now.
+                        Одоогоор шинэ мэдэгдэл алга.
                       </div>
                     )}
                   </div>
@@ -214,13 +214,13 @@ const RenterProfile = () => {
                     {formData.avatar ? (
                       <img
                         src={formData.avatar}
-                        alt="Avatar"
+                        alt="Профайл зураг"
                         className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-full border-4 border-gray-200 bg-blue-100 flex items-center justify-center">
                         <span className="text-lg font-semibold text-blue-700">
-                          {getInitials(formData.name || user?.name || "Renter")}
+                          {getInitials(formData.name || user?.name || "Түрээслэгч")}
                         </span>
                       </div>
                     )}
@@ -233,7 +233,7 @@ const RenterProfile = () => {
 
                   <div>
                     <label className="block">
-                      <span className="sr-only">Choose avatar</span>
+                      <span className="sr-only">Профайл зураг сонгох</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -246,20 +246,20 @@ const RenterProfile = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name
+                    Бүтэн нэр
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(event) => handleInputChange("name", event.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="Enter your full name"
+                    placeholder="Бүтэн нэрээ оруулна уу"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
+                    Имэйл
                   </label>
                   <input
                     type="email"
@@ -273,10 +273,10 @@ const RenterProfile = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h2 className="text-sm font-semibold text-gray-900">
-                        Background Check Document
+                        Шалгалтын баримт
                       </h2>
                       <p className="mt-1 text-sm text-gray-600">
-                        Upload proof that you have no criminal record. Accepted formats: PDF or PNG.
+                        Гэмт хэрэгт холбогдож байгаагүйг нотлох баримтаа оруулна уу. PDF эсвэл PNG файл зөвшөөрнө.
                       </p>
                     </div>
                     {uploadingDocument ? (
@@ -289,7 +289,7 @@ const RenterProfile = () => {
                   <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
                     <label className="inline-flex items-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                       <Upload className="w-4 h-4" />
-                      <span>Upload Document</span>
+                      <span>Баримт оруулах</span>
                       <input
                         type="file"
                         accept=".pdf,.png"
@@ -305,16 +305,16 @@ const RenterProfile = () => {
                         rel="noreferrer"
                         className="text-sm font-medium text-blue-600 hover:text-blue-700"
                       >
-                        View uploaded document
+                        Оруулсан баримтыг харах
                       </a>
                     ) : (
-                      <span className="text-sm text-gray-500">No document uploaded yet.</span>
+                      <span className="text-sm text-gray-500">Одоогоор баримт оруулаагүй байна.</span>
                     )}
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-                  Owners will see this profile information, including your uploaded background check document, when you send an inquiry.
+                  Та хүсэлт илгээх үед эзэмшигч таны профайл болон оруулсан шалгалтын баримтыг харна.
                 </div>
               </div>
 
@@ -324,7 +324,7 @@ const RenterProfile = () => {
                   className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
                 >
                   <X className="w-4 h-4" />
-                  <span>Cancel</span>
+                  <span>Болих</span>
                 </Link>
                 <button
                   type="button"
@@ -337,7 +337,7 @@ const RenterProfile = () => {
                   ) : (
                     <Save className="w-4 h-4" />
                   )}
-                  <span>{saving ? "Saving..." : "Save Changes"}</span>
+                  <span>{saving ? "Хадгалж байна..." : "Өөрчлөлт хадгалах"}</span>
                 </button>
               </div>
             </div>

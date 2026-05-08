@@ -123,16 +123,16 @@ const ViewTemplatePage = () => {
       <DashboardLayout activeMenu="owner-profile">
         <div className="min-h-screen bg-gray-50 px-4 py-8">
           <div className="mx-auto max-w-3xl rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-            <h1 className="text-xl font-semibold text-gray-900">Template not found</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Загвар олдсонгүй</h1>
             <p className="mt-2 text-sm text-gray-500">
-              The template you are trying to view does not exist anymore.
+              Таны харах гэж буй загвар одоо байхгүй байна.
             </p>
             <Link
               to={ROUTES.OWNER_PROFILE}
               className="mt-6 inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to profile
+              Профайл руу буцах
             </Link>
           </div>
         </div>
@@ -151,11 +151,11 @@ const ViewTemplatePage = () => {
                 className="inline-flex items-center gap-2 text-sm font-medium text-blue-200 hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back to owner profile
+                Эзэмшигчийн профайл руу буцах
               </Link>
-              <h1 className="mt-2 text-xl font-semibold text-white">View Template</h1>
+              <h1 className="mt-2 text-xl font-semibold text-white">Загвар харах</h1>
               <p className="mt-1 text-sm text-neutral-300">
-                Print this page or save it as PDF from your browser.
+                Энэ хуудсыг хэвлэх эсвэл браузераасаа PDF болгон хадгална уу.
               </p>
             </div>
             <button
@@ -164,7 +164,7 @@ const ViewTemplatePage = () => {
               className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white hover:bg-blue-700"
             >
               <Download className="h-4 w-4" />
-              Save as PDF
+              PDF болгон хадгалах
             </button>
           </div>
 
@@ -172,7 +172,7 @@ const ViewTemplatePage = () => {
             <div className="mx-auto min-h-[1123px] w-[794px] max-w-full bg-white px-10 py-14 shadow-[0_24px_70px_rgba(0,0,0,0.35)] sm:px-16 sm:py-20">
               <div className="mb-10 text-center">
                 <p className="text-sm font-medium uppercase tracking-[0.25em] text-gray-500">
-                  Lease Agreement Template
+                  Түрээсийн гэрээний загвар
                 </p>
                 <h2 className="mt-4 text-3xl font-semibold uppercase text-gray-900">
                   {currentTemplate.name}
@@ -187,7 +187,7 @@ const ViewTemplatePage = () => {
                 />
               ) : isLoadingPreview ? (
                 <div className="flex min-h-[880px] items-center justify-center text-center text-base text-gray-500">
-                  Loading template preview...
+                  Загварын урьдчилсан харагдац ачаалж байна...
                 </div>
               ) : currentTemplate.content ? (
                 <div className="min-h-[880px] whitespace-pre-wrap text-[18px] leading-10 text-gray-900">
@@ -195,11 +195,11 @@ const ViewTemplatePage = () => {
                 </div>
               ) : currentTemplate.url ? (
                 <div className="flex min-h-[880px] items-center justify-center text-center text-base leading-8 text-gray-500">
-                  This file preview could not be loaded right now.
+                  Энэ файлын урьдчилсан харагдац одоогоор ачаалж чадсангүй.
                 </div>
               ) : (
                 <div className="flex min-h-[880px] items-center justify-center text-center text-base text-gray-500">
-                  This template does not have any content to display yet.
+                  Энэ загварт одоогоор харуулах агуулга алга.
                 </div>
               )}
             </div>

@@ -12,8 +12,11 @@ const savedListingRoutes = require("./routes/savedListingRoutes");
 const analyticsRoute = require("./routes/analyticsRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+const { handleBylWebhook } = require("./controllers/inquiryController");
 const { startInquiryReminderScheduler } = require("./utils/inquiryReminderScheduler");
 const { startInquiryPaymentScheduler } = require("./utils/inquiryPaymentScheduler");
+const { startListingExpiryScheduler } = require("./utils/listingExpiry");
 
 const app = express();
 
@@ -29,6 +32,9 @@ const startServer = async () => {
     await connectDB();
     startInquiryReminderScheduler();
     startInquiryPaymentScheduler();
+    startListingExpiryScheduler();
+
+    app.post("/api/webhooks/byl", express.raw({ type: "application/json" }), handleBylWebhook);
 
     app.use(express.json());
 
@@ -40,6 +46,7 @@ const startServer = async () => {
     app.use("/api/analytics", analyticsRoute);
     app.use("/api/chats", chatRoutes);
     app.use("/api/notifications", notificationRoutes);
+    app.use("/api/reviews", reviewRoutes);
 
     app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
 

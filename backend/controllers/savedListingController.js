@@ -1,6 +1,8 @@
 const SavedListing = require("../models/SavedListing");
 const Listing = require("../models/Listing");
 const Inquiry = require("../models/Inquiry");
+const { attachReviewSummary, buildReviewStatsMap } = require("../utils/reviewStats");
+const { autoCloseExpiredListings, isListingExpired } = require("../utils/listingExpiry");
 
 exports.saveListing = async (req, res) => {
     try {
@@ -48,6 +50,7 @@ exports.unsaveListing = async (req, res) => {
 
 exports.getMySavedListings = async (req, res) => {
     try {
+        await autoCloseExpiredListings();
         const savedListings = await SavedListing.find({ renter: req.user._id })
             .populate({
                 path: "listing",
@@ -66,6 +69,7 @@ exports.getMySavedListings = async (req, res) => {
             renter: req.user._id,
             listing: { $in: listingIds },
         }).select("listing status");
+        const reviewStatsMap = await buildReviewStatsMap(listingIds);
 
         const inquiryStatusMap = {};
         inquiries.forEach((inquiry) => {
@@ -81,11 +85,16 @@ exports.getMySavedListings = async (req, res) => {
                 listing: listingObject
                     ? {
                         ...listingObject,
+                        ...attachReviewSummary(listingObject, reviewStatsMap),
                         inquiryStatus: inquiryStatusMap[listingId] || null,
                     }
                     : null,
             };
-        });
+        }).filter((savedListing) =>
+            savedListing.listing &&
+            !savedListing.listing.isClosed &&
+            !isListingExpired(savedListing.listing)
+        );
 
         res.json(savedListingsWithStatus);
     } catch (err) {

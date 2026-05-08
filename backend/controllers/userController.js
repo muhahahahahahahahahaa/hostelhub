@@ -4,6 +4,7 @@ const { execFile } = require("child_process");
 const { promisify } = require("util");
 const User = require("../models/User");
 const { getOwnerLeaseTemplates } = require("../utils/leaseTemplates");
+const { convertToPdf } = require("../utils/libreOffice");
 const execFileAsync = promisify(execFile);
 
 const TEMPLATE_PREVIEW_DIR = path.join(__dirname, "..", "uploads", "template-previews");
@@ -447,14 +448,10 @@ exports.getTemplatePreview = async (req, res) => {
             !previewStat || sourceStat.mtimeMs > previewStat.mtimeMs;
 
         if (shouldRegenerate) {
-            await execFileAsync("libreoffice", [
-                "--headless",
-                "--convert-to",
-                "pdf",
-                "--outdir",
-                TEMPLATE_PREVIEW_DIR,
+            await convertToPdf({
                 sourcePath,
-            ]);
+                outputDir: TEMPLATE_PREVIEW_DIR,
+            });
 
             const generatedPreviewPath = path.join(
                 TEMPLATE_PREVIEW_DIR,
@@ -501,14 +498,10 @@ exports.getDraftTemplatePreview = async (req, res) => {
 
         await fs.promises.writeFile(htmlPath, buildDraftPreviewHtml(title, content), "utf8");
 
-        await execFileAsync("libreoffice", [
-            "--headless",
-            "--convert-to",
-            "pdf",
-            "--outdir",
-            TEMPLATE_PREVIEW_DIR,
-            htmlPath,
-        ]);
+        await convertToPdf({
+            sourcePath: htmlPath,
+            outputDir: TEMPLATE_PREVIEW_DIR,
+        });
 
         const generatedPreviewPath = path.join(
             TEMPLATE_PREVIEW_DIR,
@@ -563,14 +556,10 @@ exports.getSectionTemplatePreview = async (req, res) => {
         });
 
         try {
-            await execFileAsync("libreoffice", [
-                "--headless",
-                "--convert-to",
-                "pdf",
-                "--outdir",
-                TEMPLATE_PREVIEW_DIR,
-                generatedDocxPath,
-            ]);
+            await convertToPdf({
+                sourcePath: generatedDocxPath,
+                outputDir: TEMPLATE_PREVIEW_DIR,
+            });
 
             return res.json({
                 previewUrl: buildTemplatePreviewUrl(req, path.basename(generatedPdfPath)),

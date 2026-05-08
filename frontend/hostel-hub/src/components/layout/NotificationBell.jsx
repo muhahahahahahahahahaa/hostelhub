@@ -104,6 +104,11 @@ const NotificationBell = () => {
 
     setIsOpen(false);
     if (user?.role === "renter") {
+      if (notification?.reminderKind === "review_available" && notification?.listing?._id) {
+        navigate(`${ROUTES.LISTING_DETAILS(notification.listing._id)}?review=1`);
+        return;
+      }
+
       if (notification?.type === "reminder") {
         navigate(ROUTES.RENTER_PROFILE);
         return;
@@ -139,7 +144,7 @@ const NotificationBell = () => {
       setUnreadCount(0);
     } catch (error) {
       console.error("Failed to mark all notifications as read", error);
-      toast.error("Failed to mark notifications as read.");
+      toast.error("Мэдэгдлүүдийг уншсан болгож чадсангүй.");
     }
   };
 
@@ -149,7 +154,7 @@ const NotificationBell = () => {
         type="button"
         onClick={() => setIsOpen((current) => !current)}
         className="relative rounded-xl p-2 text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700"
-        aria-label="Open notifications"
+        aria-label="Мэдэгдэл нээх"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 ? (
@@ -163,9 +168,9 @@ const NotificationBell = () => {
         <div className="fixed inset-x-3 top-[4.5rem] z-[70] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl sm:absolute sm:right-0 sm:top-12 sm:z-50 sm:w-[360px] sm:max-w-[360px] sm:inset-x-auto">
           <div className="flex flex-col gap-3 border-b border-gray-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+              <h3 className="text-sm font-semibold text-gray-900">Мэдэгдэл</h3>
               <p className="text-xs text-gray-500">
-                {user?.role === "renter" ? "Latest renter updates" : "Latest owner updates"}
+                {user?.role === "renter" ? "Түрээслэгчийн шинэ мэдээлэл" : "Эзэмшигчийн шинэ мэдээлэл"}
               </p>
             </div>
 
@@ -175,13 +180,13 @@ const NotificationBell = () => {
               className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
             >
               <CheckCheck className="h-3.5 w-3.5" />
-              Mark all read
+              Бүгдийг уншсан болгох
             </button>
           </div>
 
           <div className="max-h-[min(65vh,420px)] overflow-y-auto sm:max-h-[420px]">
             {loading ? (
-              <div className="px-4 py-6 text-sm text-gray-500">Loading notifications...</div>
+              <div className="px-4 py-6 text-sm text-gray-500">Мэдэгдэл ачаалж байна...</div>
             ) : sortedNotifications.length > 0 ? (
               sortedNotifications.map((notification) => (
                 <button
@@ -210,7 +215,7 @@ const NotificationBell = () => {
                 </button>
               ))
             ) : (
-              <div className="px-4 py-6 text-sm text-gray-500">No notifications yet.</div>
+              <div className="px-4 py-6 text-sm text-gray-500">Одоогоор мэдэгдэл алга.</div>
             )}
           </div>
         </div>

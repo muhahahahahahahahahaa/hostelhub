@@ -11,32 +11,36 @@ import { useAuth } from "../../context/AuthContext";
 import { NAVIGATION_MENU } from "../../utils/data";
 import ProfileDropdown from "./ProfileDropdown";
 import NotificationBell from "./NotificationBell";
+import PreferenceControls from "./PreferenceControls";
+import { usePreferences } from "../../context/PreferencesContext";
 import { ROUTES } from "../../utils/routePaths";
 
 const NavigationItem = ({item, isActive, onClick, isCollapsed}) => {
+    const { t } = usePreferences();
     const Icon = item.icon
     return <button
         onClick={() => onClick(item.id)}
         className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
             isActive
-                ? "bg-blue-50 text-blue-700 shadow-sm shadow-blue-50"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                ? "bg-blue-50 text-blue-700 shadow-sm shadow-blue-50 dark:bg-blue-950/60 dark:text-blue-200 dark:shadow-none"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
         }`}
         >
             <Icon 
                 className={`h-5 w-5 flex-shrink-0 ${
-                    isActive ? "text-blue-600" : "text-gray-500"
+                    isActive ? "text-blue-600 dark:text-blue-300" : "text-gray-500 dark:text-gray-400"
                 }`}
             />
-            {!isCollapsed && <span className="ml-3 truncate">{item.name}</span>}
+            {!isCollapsed && <span className="ml-3 truncate">{item.labelKey ? t(item.labelKey) : item.name}</span>}
         </button>
 }
 
 const DashboardLayout = ({activeMenu, children, mainClassName = ""}) => {
 
-    const {user, logout} = useAuth();  
+    const {user, logout} = useAuth();
+    const { t } = usePreferences();
     const navigate = useNavigate();
-    const profileLabel = user?.hostelName || user?.name || "Owner";
+    const profileLabel = user?.hostelName || user?.name || "Эзэмшигч";
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeNavItem, setActiveNavItem] = useState(activeMenu || 'dashboard');
@@ -86,7 +90,7 @@ const DashboardLayout = ({activeMenu, children, mainClassName = ""}) => {
 
     const sidebarCollapsed = !isMobile && false;
     return (
-        <div className ="flex h-screen bg-gray-50">
+        <div className ="flex h-screen bg-gray-50 dark:bg-gray-950">
             {/*sidebar */}
             <div className = {`fixed inset-y-0 left-0 z-50 transition-transform duration-300 ${
                 isMobile
@@ -96,16 +100,16 @@ const DashboardLayout = ({activeMenu, children, mainClassName = ""}) => {
                     : "translate-x-0"
             } ${
                 sidebarCollapsed ? "w-16" : "w-64"
-            } bg-white border-r border-gray-200`}
+            } bg-white border-r border-gray-200 dark:border-gray-800 dark:bg-gray-900`}
             >
                 {/*company logo */}
-                <div className= "flex items-center h-16 border-b border-gray-200 pl-6">
+                <div className= "flex items-center h-16 border-b border-gray-200 pl-6 dark:border-gray-800">
                     {!sidebarCollapsed ? (
                         <Link className="flex items-center space-x-3" to={ROUTES.HOME}>
                             <div className="h-8 w-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
                                 <House className="h-5 w-5 text-white"/>
                             </div>
-                            <span className="text-gray-900 font-bold text-xl">HostelHub</span>
+                            <span className="text-gray-900 font-bold text-xl dark:text-white">HostelHub</span>
                         </Link>
                     ) : (
                         <div className="h-8 w-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
@@ -128,11 +132,11 @@ const DashboardLayout = ({activeMenu, children, mainClassName = ""}) => {
                 {/*logout */}
                 <div className = "absolute bottom-4 left-4 right-4" >
                     <button
-                        className="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
+                        className="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
                         onClick={logout}
                     >
-                        <LogOut className="h-5 w-5 flex-shrink-0 text-gray-500"/>
-                        {!sidebarCollapsed && <span className="ml-3">Logout</span>}
+                        <LogOut className="h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400"/>
+                        {!sidebarCollapsed && <span className="ml-3">{t("logout")}</span>}
                     </button>
                 </div>
             </div>
@@ -150,30 +154,31 @@ const DashboardLayout = ({activeMenu, children, mainClassName = ""}) => {
                 }`}
             >
                 {/*top navbar */}
-                <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 h-16 flex items-center justify-between px-6 sticky top-0 z-30">
+                <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 h-16 flex items-center justify-between px-6 sticky top-0 z-30 dark:border-gray-800 dark:bg-gray-950/80">
                     <div className="flex items-center space-x-4">
                         {isMobile && (
                             <button
                                 onClick={toggleSidebar}
-                                className="p-2 rounded-xl hover:bg-gray-100 transition-colors duration-200"
+                                className="p-2 rounded-xl hover:bg-gray-100 transition-colors duration-200 dark:hover:bg-gray-800"
                             >
                                 {sidebarOpen ? (
-                                    <X className="h-5 w-5 text-gray-600" />
+                                    <X className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                                 ) : (
-                                    <Menu className="h-5 w-5 text-gray-600" />
+                                    <Menu className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                                 )}
                             </button>
                         )}
                         <div>
-                            <h1 className="text-base font-semibold text-gray-900">
-                                Welcome back!
+                            <h1 className="text-base font-semibold text-gray-900 dark:text-white">
+                                {t("welcome")}
                             </h1>
-                            <p className="text-sm text-gray-500 hidden sm:block">
-                                Here's what is happening with your hostel listings today.
+                            <p className="text-sm text-gray-500 hidden sm:block dark:text-gray-400">
+                                {t("ownerOverview")}
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center space-x-3">
+                        <PreferenceControls />
                         <NotificationBell />
                         {/*profile dropdown */}
                         <ProfileDropdown

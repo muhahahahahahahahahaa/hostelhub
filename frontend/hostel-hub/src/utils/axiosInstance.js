@@ -1,6 +1,7 @@
 import axios from "axios";
 import { BASE_URL } from "./apiPaths";
 import { normalizeAssetUrls } from "./helper";
+import { translateApiPayload } from "./locale";
 
 const axiosInstance = axios.create({
     baseURL: BASE_URL || undefined,
@@ -29,7 +30,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response) => {
         if (response?.data) {
-            response.data = normalizeAssetUrls(response.data);
+            response.data = translateApiPayload(normalizeAssetUrls(response.data));
         }
         return response;
     },
@@ -39,6 +40,10 @@ axiosInstance.interceptors.response.use(
             const responseMessage = String(
                 error.response.data?.message || error.response.data?.error || ""
             ).toLowerCase();
+
+            if (error.response.data) {
+                error.response.data = translateApiPayload(error.response.data);
+            }
 
             const isAuthTokenError =
                 error.response.status === 401 &&

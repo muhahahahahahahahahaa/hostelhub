@@ -1,7 +1,9 @@
 import {motion as Motion} from 'framer-motion';
 import {TrendingUp, Users, House, Target} from 'lucide-react';
+import { usePreferences } from '../../../context/PreferencesContext';
 
 const Analytics = () => {
+    const { language } = usePreferences();
     const colorClasses = {
         blue: {
             iconBg: "bg-blue-100",
@@ -24,35 +26,35 @@ const Analytics = () => {
     const stats = [
         {
             icon: Users,
-            title: 'Active Renters',
+            title: language === "en" ? "Active renters" : "Идэвхтэй түрээслэгч",
             value: '2.4K+',
             growth: '+12%',
             color: 'blue'
         },
         {
             icon: House,
-            title:'Active Listings',
+            title: language === "en" ? "Active listings" : "Идэвхтэй зар",
             value: '320+',
             growth: '+18%',
             color: 'purple'
         },
         {
             icon: Target,
-            title: 'Confirmed Inquiries',
+            title: language === "en" ? "Confirmed inquiries" : "Баталгаажсан хүсэлт",
             value: '840+',
             growth: '+9%',
             color: 'green'
         },
         {
             icon: TrendingUp,
-            title: 'Occupancy Rate',
+            title: language === "en" ? "Occupancy rate" : "Дүүргэлтийн хувь",
             value: '91%',
             growth: '+6%',
             color: 'orange'
         }
     ];
   return (
-    <section className="py-20 bg-white relative overflow-hidden">
+    <section className="py-20 bg-white relative overflow-hidden dark:bg-gray-950">
         <div className="container mx-auto px-4">
             <Motion.div
                 initial={{opacity:0, y:30}}
@@ -61,14 +63,16 @@ const Analytics = () => {
                 viewport={{once:true}}
                 className="text-center mb-16"
             >
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 dark:text-white">
                     HostelHub
                     <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        Statistics
+                        {language === "en" ? " metrics" : " үзүүлэлт"}
                     </span>
                 </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Example platform metrics that highlight growth in listings, inquiries, and occupancy.
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto dark:text-gray-300">
+                    {language === "en"
+                        ? "Sample metrics for listing, inquiry, and occupancy growth."
+                        : "Зар, хүсэлт, дүүргэлтийн өсөлтийг харуулах жишээ үзүүлэлтүүд."}
                 </p>
             </Motion.div>
             {/*Stat cards */}
@@ -80,7 +84,7 @@ const Analytics = () => {
                         whileInView={{opacity:1, y:0}}
                         transition={{delay: index * 0.1, duration:0.6}}
                         viewport={{once:true}}
-                        className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
+                        className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 dark:border-gray-800 dark:bg-gray-900"
                     >
                         <div className="flex items-center justify-between mb-4">
                             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colorClasses[stat.color].iconBg}`}>
@@ -90,8 +94,8 @@ const Analytics = () => {
                                 {stat.growth}
                             </span>
                         </div>
-                        <h3 className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</h3>
-                        <p className="text-gray-600">{stat.title} </p> 
+                        <h3 className="text-3xl font-bold text-gray-900 mb-2 dark:text-white">{stat.value}</h3>
+                        <p className="text-gray-600 dark:text-gray-300">{stat.title} </p>
                     </Motion.div>
                 ))}
             </div>

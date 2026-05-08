@@ -5,6 +5,7 @@ import {
   Eye,
   Plus,
   Search,
+  Star,
   Trash2,
 } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance";
@@ -15,8 +16,11 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { formatCompactCurrency } from "../../utils/helper";
 import { ROUTES } from "../../utils/routePaths";
+import { translateCategory, translateRoomType } from "../../utils/locale";
+import { usePreferences } from "../../context/PreferencesContext";
 
 const ManageListings = () => {
+  const { language, t } = usePreferences();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -29,19 +33,23 @@ const ManageListings = () => {
         id: listing._id,
         title: listing.title,
         hostelName:
-          listing?.owner?.hostelName || listing?.owner?.name || "Hostel Owner",
+          listing?.owner?.hostelName || listing?.owner?.name || t("hostelOwner"),
         location: listing.location,
         category: listing.category,
         roomType: listing.roomType,
         rent: listing.dailyRent ?? listing.monthlyRent,
         deposit: listing.deposit,
         availableBeds: listing.availableBeds,
-        status: listing.isClosed ? "Closed" : "Active",
+        availableUntil: listing.availableUntil,
+        status: listing.isExpired ? "Inactive" : listing.isClosed ? "Closed" : "Active",
         inquiries: listing.inquiryCount || 0,
+        averageRating: Number(listing?.reviewSummary?.averageRating || 0),
+        reviewCount: Number(listing?.reviewSummary?.reviewCount || 0),
+        completedRentalCount: Number(listing?.reviewSummary?.completedRentalCount || 0),
         createdAt: listing.createdAt,
         logo: listing?.owner?.hostelLogo,
       })),
-    []
+    [t]
   );
 
   const fetchListings = useCallback(
@@ -86,23 +94,30 @@ const ManageListings = () => {
   const handleStatusChange = async (listingId) => {
     try {
       await axiosInstance.put(API_PATHS.LISTINGS.TOGGLE_CLOSE(listingId));
-      toast.success("Listing status updated.");
+      toast.success(t("statusUpdated"));
       await refreshListings();
     } catch (error) {
       console.error("Error toggling listing status:", error);
-      toast.error("Failed to update listing status.");
+      toast.error(t("statusUpdateFailed"));
     }
   };
 
   const handleDeleteListing = async (listingId) => {
     try {
       await axiosInstance.delete(API_PATHS.LISTINGS.DELETE(listingId));
-      toast.success("Listing deleted successfully.");
+      toast.success(language === "en" ? "Listing deleted successfully." : "Зар амжилттай устлаа.");
       await refreshListings();
     } catch (error) {
       console.error("Error deleting listing:", error);
-      toast.error("Failed to delete listing.");
+      toast.error(language === "en" ? "Failed to delete listing." : "Зар устгаж чадсангүй.");
     }
+  };
+
+  const getStatusLabel = (status) => {
+    if (status === "Active") return t("active");
+    if (status === "Inactive") return t("inactive");
+    if (status === "Closed") return t("closed");
+    return status;
   };
 
   return (
@@ -112,10 +127,10 @@ const ManageListings = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900">
-                Manage Listings
+                {t("manageListingsTitle")}
               </h1>
               <p className="text-sm text-gray-600 mt-1">
-                Create, edit, close, and review inquiry performance for your hostel listings.
+                {t("manageListingsSubtitle")}
               </p>
             </div>
 
@@ -125,7 +140,7 @@ const ManageListings = () => {
               onClick={() => navigate(ROUTES.POST_LISTING)}
             >
               <Plus className="w-5 h-5 mr-2" />
-              Add Listing
+              {t("addListing")}
             </button>
           </div>
 
@@ -135,7 +150,7 @@ const ManageListings = () => {
                 <Search className="absolute inset-y-0 left-0 my-auto ml-3 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search listings..."
+                  placeholder={t("searchListings")}
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   className="block w-full pl-10 pr-4 py-4 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-0 transition-all duration-200 bg-gray-50/50"
@@ -148,26 +163,27 @@ const ManageListings = () => {
                   onChange={(event) => setStatusFilter(event.target.value)}
                   className="block w-full px-4 py-4 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                 >
-                  <option value="All">All Status</option>
-                  <option value="Active">Active</option>
-                  <option value="Closed">Closed</option>
+                  <option value="All">{t("allStatuses")}</option>
+                  <option value="Active">{t("active")}</option>
+                  <option value="Inactive">{t("inactive")}</option>
+                  <option value="Closed">{t("closed")}</option>
                 </select>
               </div>
             </div>
 
             <div className="my-4 text-sm text-gray-600">
-              Showing {filteredListings.length} listing{filteredListings.length === 1 ? "" : "s"}
+              {filteredListings.length} {t("listingsVisible")}
             </div>
           </div>
 
           {isLoading ? (
             <div className="rounded-2xl border border-gray-100 bg-white p-10 text-center text-gray-500">
-              Loading listings...
+              {t("loadingListings")}
             </div>
           ) : filteredListings.length === 0 ? (
             <div className="rounded-2xl border border-gray-100 bg-white p-10 text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No listings found</h3>
-              <p className="text-gray-500">Try a different search or create a new listing.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">{t("noListingsFound")}</h3>
+              <p className="text-gray-500">{t("tryAnotherSearch")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -203,7 +219,7 @@ const ManageListings = () => {
                         <p className="text-sm text-blue-600 font-medium">{listing.hostelName}</p>
                         <h3 className="text-lg font-semibold text-gray-900">{listing.title}</h3>
                         <p className="text-sm text-gray-500 mt-1">
-                          {listing.location} * {listing.category} * {listing.roomType}
+                          {listing.location} * {translateCategory(listing.category, language)} * {translateRoomType(listing.roomType, language)}
                         </p>
                       </div>
                     </div>
@@ -212,42 +228,60 @@ const ManageListings = () => {
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
                         listing.status === "Active"
                           ? "bg-emerald-100 text-emerald-700"
+                          : listing.status === "Inactive"
+                            ? "bg-amber-100 text-amber-700"
                           : "bg-gray-100 text-gray-600"
                       }`}
                     >
-                      {listing.status}
+                      {getStatusLabel(listing.status)}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mt-6">
                     <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-xs text-gray-500">Daily Rent</p>
+                      <p className="text-xs text-gray-500">{t("dailyRent")}</p>
                       <p className="text-sm font-semibold text-gray-900">
                         {formatCompactCurrency(listing.rent)}
                       </p>
                     </div>
                     <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-xs text-gray-500">Deposit</p>
+                      <p className="text-xs text-gray-500">{t("deposit")}</p>
                       <p className="text-sm font-semibold text-gray-900">
                         {formatCompactCurrency(listing.deposit)}
                       </p>
                     </div>
                     <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-xs text-gray-500">Beds</p>
+                      <p className="text-xs text-gray-500">{t("bedCount")}</p>
                       <p className="text-sm font-semibold text-gray-900">
                         {listing.availableBeds || 0}
                       </p>
                     </div>
                     <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-xs text-gray-500">Inquiries</p>
+                      <p className="text-xs text-gray-500">{t("inquiryCount")}</p>
                       <p className="text-sm font-semibold text-gray-900">
                         {listing.inquiries}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-amber-50 p-3">
+                      <p className="text-xs text-amber-700">{t("rating")}</p>
+                      <p className="flex items-center gap-1 text-sm font-semibold text-amber-800">
+                        <Star className="h-3.5 w-3.5 fill-current" />
+                        {listing.averageRating > 0 ? listing.averageRating.toFixed(1) : "0.0"}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-blue-50 p-3">
+                      <p className="text-xs text-blue-700">{t("reviews")}</p>
+                      <p className="text-sm font-semibold text-blue-900">
+                        {listing.reviewCount} / {listing.completedRentalCount}
                       </p>
                     </div>
                   </div>
 
                   <div className="mt-4 text-xs text-gray-500">
-                    Posted {moment(listing.createdAt).format("Do MMM YYYY")}
+                    {t("published")}: {moment(listing.createdAt).format("Do MMM YYYY")}
+                    {listing.availableUntil ? (
+                      <span> · {t("availableUntil")}: {moment(listing.availableUntil).format("Do MMM YYYY")}</span>
+                    ) : null}
                   </div>
 
                   <div className="flex flex-wrap gap-3 mt-6">
@@ -260,7 +294,7 @@ const ManageListings = () => {
                       className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
                     >
                       <Eye className="h-4 w-4" />
-                      View Inquiries
+                      {t("viewInquiries")}
                     </button>
                     <button
                       type="button"
@@ -271,7 +305,7 @@ const ManageListings = () => {
                       className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       <Edit className="h-4 w-4" />
-                      Edit
+                      {t("edit")}
                     </button>
                     <button
                       type="button"
@@ -279,9 +313,14 @@ const ManageListings = () => {
                         event.stopPropagation();
                         handleStatusChange(listing.id);
                       }}
+                      disabled={listing.status === "Inactive"}
                       className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors"
                     >
-                      {listing.status === "Active" ? "Close" : "Reopen"}
+                      {listing.status === "Inactive"
+                        ? t("expired")
+                        : listing.status === "Active"
+                          ? t("close")
+                          : t("reopen")}
                     </button>
                     <button
                       type="button"
@@ -292,7 +331,7 @@ const ManageListings = () => {
                       className="inline-flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-700 rounded-lg hover:bg-rose-100 transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />
-                      Delete
+                      {t("delete")}
                     </button>
                   </div>
                 </div>

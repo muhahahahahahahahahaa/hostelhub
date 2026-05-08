@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { CATEGORIES, ROOM_TYPES } from "../../../utils/data";
 import RentRangeSlider from "../../../components/Input/RentRangeSlider";
+import { usePreferences } from "../../../context/PreferencesContext";
 
 const FilterSection = ({ title, children, isExpanded, onToggle }) => (
     <div className="border-b border-gray-200 pb-4 mb-4 last:border-b-0">
@@ -29,6 +30,9 @@ const FilterContent = ({
     filters,
     handleFilterChange,
 }) => {
+    const { language } = usePreferences();
+    const optionLabel = (option) => language === "en" ? option.labelEn : option.label;
+
     return (
         <>
             <div className="flex items-center justify-between mb-6">
@@ -36,12 +40,12 @@ const FilterContent = ({
                     onClick={clearAllFilters}
                     className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
                 >
-                    Clear All
+                    {language === "en" ? "Clear all" : "Бүгдийг арилгах"}
                 </button>
             </div>
 
             <FilterSection
-                title="Room Type"
+                title={language === "en" ? "Room type" : "Өрөөний төрөл"}
                 isExpanded={expandedSections?.roomType}
                 onToggle={() => toggleSection("roomType")}
             >
@@ -59,14 +63,14 @@ const FilterContent = ({
                                     )
                                 }
                             />
-                            <span className="ml-3 text-gray-700 font-medium">{type.label}</span>
+                            <span className="ml-3 text-gray-700 font-medium">{optionLabel(type)}</span>
                         </label>
                     ))}
                 </div>
             </FilterSection>
 
             <FilterSection
-                title="Daily Rent"
+                title={language === "en" ? "Daily rent" : "Өдрийн түрээс"}
                 isExpanded={expandedSections?.rent}
                 onToggle={() => toggleSection("rent")}
             >
@@ -77,7 +81,7 @@ const FilterContent = ({
             </FilterSection>
 
             <FilterSection
-                title="Category"
+                title={language === "en" ? "Category" : "Ангилал"}
                 isExpanded={expandedSections?.category}
                 onToggle={() => toggleSection("category")}
             >
@@ -96,7 +100,7 @@ const FilterContent = ({
                                 }
                             />
                             <span className="ml-3 text-gray-700 font-medium">
-                                {category.label}
+                                {optionLabel(category)}
                             </span>
                         </label>
                     ))}

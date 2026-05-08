@@ -10,6 +10,8 @@ import toast from "react-hot-toast";
 import StatusBadge from "../StatusBadge";
 import { formatCurrency } from "../../utils/helper";
 import { ROUTES } from "../../utils/routePaths";
+import { translateRoomType, translateStatus } from "../../utils/locale";
+import { usePreferences } from "../../context/PreferencesContext";
 
 const statusOptions = ["New", "Contacted", "Confirmed", "Declined"];
 
@@ -20,6 +22,7 @@ const InquiryPreview = ({
     handleClose,
 }) => {
     const navigate = useNavigate();
+    const { language, t } = usePreferences();
     const [currentStatus, setCurrentStatus] = useState(selectedInquiry.status)
     const [loading, setLoading] = useState(false);
 
@@ -45,7 +48,7 @@ const InquiryPreview = ({
             );
             if (response.status === 200) {
                 setSelectedInquiry({ ...selectedInquiry, status: newStatus });
-                toast.success("Inquiry status updated successfully")
+                toast.success(t("statusUpdated"))
             }
         } catch (err) {
             console.error ("Error updating status:", err);
@@ -60,7 +63,7 @@ const InquiryPreview = ({
                 {/*modal header */}
                 <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-gray-200 bg-white">
                     <h3 className="text-lg font-semibold text-gray-900">
-                        Renter Inquiry
+                        {t("renterInquiry")}
                     </h3>
                     <button
                         onClick={() => handleClose()}
@@ -95,7 +98,7 @@ const InquiryPreview = ({
                     <div className="space-y-4">
                         <div className="bg-gray-50 rounded-lg p-4">
                             <h5 className="font-medium text-gray-900 mb-2">
-                                Listing
+                                {t("listing")}
                             </h5>
                             <p className="text-gray-700">{selectedInquiry.listing.title}</p>
                             <div className="mt-2 space-y-1 text-gray-600 text-sm">
@@ -105,18 +108,18 @@ const InquiryPreview = ({
                                 </p>
                                 <p className="flex items-center gap-2">
                                     <Users className="h-4 w-4" />
-                                    {selectedInquiry.listing.roomType} * {selectedInquiry.listing.availableBeds || 0} beds
+                                    {translateRoomType(selectedInquiry.listing.roomType, language)} * {selectedInquiry.listing.availableBeds || 0} {t("beds")}
                                 </p>
                                 <p className="flex items-center gap-2">
                                     <Coins className="h-4 w-4" />
-                                    {formatCurrency(selectedInquiry.listing.dailyRent ?? selectedInquiry.listing.monthlyRent)}/day
+                                    {formatCurrency(selectedInquiry.listing.dailyRent ?? selectedInquiry.listing.monthlyRent)}/{t("perDay")}
                                 </p>
                             </div>
                         </div>
 
                         <div className="bg-gray-50 rounded-lg p-4">
                             <h5 className="font-medium text-gray-900 mb-2">
-                                Background Check Document
+                                {t("backgroundDocument")}
                             </h5>
                             {selectedInquiry.renter.backgroundCheckDocument ? (
                                 <a
@@ -126,25 +129,25 @@ const InquiryPreview = ({
                                     className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
                                 >
                                     <FileText className="h-4 w-4" />
-                                    <span>Open uploaded document</span>
+                                    <span>{t("openUploadedDocument")}</span>
                                     <ExternalLink className="h-4 w-4" />
                                 </a>
                             ) : (
-                                <p className="text-sm text-gray-500">No document uploaded.</p>
+                                <p className="text-sm text-gray-500">{t("noDocumentUploaded")}</p>
                             )}
                         </div>
 
                         <div className="bg-gray-50 rounded-lg p-4">
                             <h5 className="font-medium text-gray-900 mb-2">
-                                Inquiry Details
+                                {t("inquiryDetails")}
                             </h5>
                             <div className="space-y-2">
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">Status:</span>
+                                    <span className="text-gray-600">{t("status")}:</span>
                                     <StatusBadge status={currentStatus} />
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-gray-600">Inquiry date:</span>
+                                    <span className="text-gray-600">{t("inquiryDate")}:</span>
                                     <span className="text-gray-900">
                                         {moment(selectedInquiry.createdAt)?.format("Do MM YYYY")}
                                     </span>
@@ -158,13 +161,13 @@ const InquiryPreview = ({
                             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
                         >
                             <MessageSquare className="h-4 w-4" />
-                            Open Messenger Chat
+                            {t("openChatAction")}
                         </button>
 
                         {/*status dropdown */}
                         <div className="mt-4">
                             <label className="block mb-1 text-sm text-gray-700 font-medium">
-                                Change Inquiry Status
+                                {t("changeInquiryStatus")}
                             </label>
                             <select
                                 value={currentStatus}
@@ -174,12 +177,12 @@ const InquiryPreview = ({
                             >
                                 {statusOptions.map((status) => (
                                     <option key={status} value={status}>
-                                        {status}
+                                        {translateStatus(status, language)}
                                     </option>
                                 ))}
                             </select>
                             {loading && (
-                                <p className="text-xs text-gray-500 mt-1">Updating status...</p>
+                                <p className="text-xs text-gray-500 mt-1">{t("updatingStatus")}</p>
                             )}
                         </div>
                     </div>

@@ -152,14 +152,14 @@ const NewTemplatePage = () => {
 
     if (!trimmedName) {
       setShowNameError(true);
-      toast.error("Enter a template name.");
+      toast.error("Загварын нэр оруулна уу.");
       return;
     }
 
     setShowNameError(false);
 
     if (!hasAtLeastOneClause) {
-      toast.error("At least one clause is required.");
+      toast.error("Дор хаяж нэг заалт шаардлагатай.");
       return;
     }
 
@@ -168,7 +168,7 @@ const NewTemplatePage = () => {
     );
 
     if (hasDuplicateName) {
-      toast.error("Template name already exists.");
+      toast.error("Ийм нэртэй загвар аль хэдийн байна.");
       return;
     }
 
@@ -194,11 +194,11 @@ const NewTemplatePage = () => {
       });
 
       updateUser(response.data);
-      toast.success("Template created successfully.");
+      toast.success("Загвар амжилттай үүслээ.");
       navigate(ROUTES.OWNER_PROFILE);
     } catch (error) {
       console.error("Template create failed", error);
-      toast.error(error?.response?.data?.message || "Failed to create template.");
+      toast.error(error?.response?.data?.message || "Загвар үүсгэж чадсангүй.");
     } finally {
       setSaving(false);
     }
@@ -218,7 +218,7 @@ const NewTemplatePage = () => {
 
     if (!name.trim()) {
       setShowNameError(true);
-      toast.error("Enter a template name first.");
+      toast.error("Эхлээд загварын нэр оруулна уу.");
       return;
     }
 
@@ -240,7 +240,7 @@ const NewTemplatePage = () => {
       setShowPreview(true);
     } catch (error) {
       console.error("New template preview failed", error);
-      toast.error(error?.response?.data?.message || "Failed to generate preview.");
+      toast.error(error?.response?.data?.message || "Урьдчилсан харагдац үүсгэж чадсангүй.");
     } finally {
       setPreviewLoading(false);
     }
@@ -257,9 +257,9 @@ const NewTemplatePage = () => {
                 className="inline-flex items-center gap-2 text-sm font-medium text-blue-200 hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back to owner profile
+                Эзэмшигчийн профайл руу буцах
               </Link>
-              <h1 className="mt-2 text-xl font-semibold text-white">Add New Template</h1>
+              <h1 className="mt-2 text-xl font-semibold text-white">Шинэ загвар нэмэх</h1>
               
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -269,7 +269,7 @@ const NewTemplatePage = () => {
                 disabled={previewLoading}
                 className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white hover:bg-blue-700"
               >
-                {previewLoading ? "Preview бэлдэж байна..." : showPreview ? "Preview хаах" : "Preview"}
+                {previewLoading ? "Урьдчилсан харагдац бэлдэж байна..." : showPreview ? "Урьдчилсан харагдац хаах" : "Урьдчилж харах"}
               </button>
               <button
                 type="button"
@@ -278,7 +278,7 @@ const NewTemplatePage = () => {
                 className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-medium text-white hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Save className="h-4 w-4" />
-                {saving ? "Saving..." : "Save Template"}
+                {saving ? "Хадгалж байна..." : "Загвар хадгалах"}
               </button>
             </div>
           </div>
@@ -291,7 +291,7 @@ const NewTemplatePage = () => {
             >
               <div className="mb-4 rounded-2xl border border-gray-200 bg-gray-50 p-4">
                 <label className="block text-sm font-medium text-gray-700">
-                  Template Name <span className="text-rose-500">*</span>
+                  Загварын нэр <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -302,7 +302,7 @@ const NewTemplatePage = () => {
                       setShowNameError(false);
                     }
                   }}
-                  placeholder="Enter template name"
+                  placeholder="Загварын нэр оруулна уу"
                   required
                   aria-required="true"
                   className={`mt-3 h-12 w-full rounded-xl bg-white px-4 text-sm text-gray-900 outline-none placeholder:text-gray-400 ${
@@ -312,7 +312,7 @@ const NewTemplatePage = () => {
                   }`}
                 />
                 {showNameError ? (
-                  <p className="mt-2 text-sm text-rose-500">Template name is required.</p>
+                  <p className="mt-2 text-sm text-rose-500">Загварын нэр шаардлагатай.</p>
                 ) : null}
               </div>
 
@@ -368,7 +368,7 @@ const NewTemplatePage = () => {
                             ))
                           ) : (
                             <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-sm text-gray-400">
-                              This section is empty.
+                              Энэ хэсэг хоосон байна.
                             </div>
                           )}
 
@@ -418,7 +418,7 @@ const NewTemplatePage = () => {
               <div className="overflow-hidden rounded-[28px] bg-neutral-700/80 p-3 shadow-2xl sm:p-4">
                 {previewUrl ? (
                   <iframe
-                    title={`${name || "New Template"} preview`}
+                    title={`${name || "Шинэ загвар"} урьдчилсан харагдац`}
                     src={previewUrl}
                     className="h-[calc(100vh-180px)] min-h-[720px] w-full rounded-2xl border-0 bg-white"
                   />
@@ -427,10 +427,10 @@ const NewTemplatePage = () => {
                     <div className="mx-auto min-h-[1123px] w-[794px] max-w-full bg-white px-10 py-14 shadow-[0_24px_70px_rgba(0,0,0,0.35)] sm:px-16 sm:py-20">
                       <div className="mb-10 text-center">
                         <p className="text-sm font-medium uppercase tracking-[0.25em] text-gray-500">
-                          Lease Agreement Template
+                          Түрээсийн гэрээний загвар
                         </p>
                         <h2 className="mt-4 text-3xl font-semibold uppercase text-gray-900">
-                          {name || "New Template"}
+                          {name || "Шинэ загвар"}
                         </h2>
                       </div>
 

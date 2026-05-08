@@ -12,13 +12,15 @@ import {
 } from "lucide-react";
 import { AMENITY_OPTIONS, CATEGORIES, ROOM_TYPES } from "../../utils/data";
 import { useAuth } from "../../context/AuthContext";
+import { usePreferences } from "../../context/PreferencesContext";
 import { formatCurrency } from "../../utils/helper";
 import moment from "moment";
 
 const ListingPreview = ({ formData, setIsPreview }) => {
     const {user} = useAuth()
+    const { language, t } = usePreferences();
     const amenities = formData.amenities || [];
-    const hostelName = user?.hostelName || "Hostel owner";
+    const hostelName = user?.hostelName || t("hostelOwner");
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 py-8 px-4 sm:px-6 lg:px-80">
@@ -28,7 +30,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <h2 className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                                Listing Preview
+                                {t("preview")}
                             </h2>
                         </div>
                         <button
@@ -36,7 +38,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                             className="group flex items-center space-x-2 px-6 py-3 text-xs md:text-sm font-medium text-gray-600 hover:text-white bg-white/50 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 border-gray-200 hover:border-transparent rounded-xl transition-all duration-300 shadow-lg shadow-gray-100 hover:shadow-xl transform hover:-translate-y-0.5"
                         >
                             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                            <span>Back to Edit</span>
+                            <span>{language === "en" ? "Back to edit" : "Засах руу буцах"}</span>
                         </button>
                     </div>
                     {/*Main content card */}
@@ -48,7 +50,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                                     <div className="mb-6 space-y-3">
                                         <img
                                             src={formData.images[0]}
-                                            alt={formData.title || "Listing preview"}
+                                            alt={formData.title || t("preview")}
                                             className="h-72 w-full rounded-2xl object-cover border border-gray-200"
                                         />
                                         {formData.images.length > 1 ? (
@@ -57,7 +59,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                                                     <img
                                                         key={`${image}-${index}`}
                                                         src={image}
-                                                        alt={`Listing preview ${index + 2}`}
+                                                        alt={`${t("preview")} ${index + 2}`}
                                                         className="h-20 w-full rounded-xl object-cover border border-gray-200"
                                                     />
                                                 ))}
@@ -68,7 +70,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                                     <div className="mb-6 flex h-40 items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 text-gray-500">
                                         <div className="flex items-center gap-2 text-sm font-medium">
                                             <ImagePlus className="h-4 w-4" />
-                                            <span>No listing images added yet</span>
+                                            <span>{language === "en" ? "No images added yet" : "Одоогоор зураг нэмээгүй байна"}</span>
                                         </div>
                                     </div>
                                 )}
@@ -93,7 +95,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                                     {user?.hostelLogo ? (
                                         <img
                                             src={user.hostelLogo}
-                                            alt="Hostel Logo"
+                                            alt={t("hostelLogo")}
                                             className="h-16 md:h-20 w-16 md:w-20 object-cover rounded-2xl border-4 border-white/20 shadow-lg"
                                         />
                                     ) : (
@@ -108,19 +110,19 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                                     <span className="px-4 py-2 bg-blue-50 text-sm text-blue-700 font-semibold rounded-full border border-blue-200">
                                         {
                                             CATEGORIES.find((c) => c.value === formData.category)
-                                                ?.label
+                                                ?.[language === "en" ? "labelEn" : "label"]
                                         }
                                     </span>
                                     <span className="px-4 py-2 text-sm bg-purple-50 text-purple-700 font-semibold rounded-full border border-purple-200">
-                                        {ROOM_TYPES.find((room) => room.value === formData.roomType)?.label}
+                                        {ROOM_TYPES.find((room) => room.value === formData.roomType)?.[language === "en" ? "labelEn" : "label"]}
                                     </span>
                                     <span className="px-4 py-2 text-sm bg-emerald-50 text-emerald-700 font-semibold rounded-full border border-emerald-200 inline-flex items-center gap-2">
                                         <BedDouble className="h-4 w-4" />
-                                        {formData.availableBeds || 0} beds
+                                        {formData.availableBeds || 0} {t("beds")}
                                     </span>
                                     <div className="flex items-center space-x-1 px-4 py-2 bg-gray-50 text-sm text-gray-700 font-semibold rounded-full border border-gray-200">
                                         <Clock className="h-4 w-4" />
-                                        <span>Posted today</span>
+                                        <span>{language === "en" ? "Posted today" : "Өнөөдөр нийтэлсэн"}</span>
                                     </div>
                                     {formData.availableFrom || formData.availableUntil ? (
                                         <div className="flex items-center space-x-1 px-4 py-2 bg-amber-50 text-sm text-amber-700 font-semibold rounded-full border border-amber-200">
@@ -128,11 +130,11 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                                             <span>
                                                 {formData.availableFrom
                                                     ? moment(formData.availableFrom).format("Do MMM YYYY")
-                                                    : "Now"}{" "}
+                                                    : t("now")}{" "}
                                                 -{" "}
                                                 {formData.availableUntil
                                                     ? moment(formData.availableUntil).format("Do MMM YYYY")
-                                                    : "Open"}
+                                                    : t("openEnded")}
                                             </span>
                                         </div>
                                     ) : null}
@@ -152,7 +154,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                                             </div>
                                             <div>
                                                 <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                                                    Daily Rent
+                                                    {t("dailyRent")}
                                                 </h3>
                                                 <div className="text-sm md:text-lg font-bold text-gray-900">
                                                     {formatCurrency(formData.dailyRent)}
@@ -161,11 +163,11 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                                         </div>
                                         <div className="hidden md:flex items-center space-x-2 text-sm text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full justify-center">
                                             <Users className="h-4 w-4"/>
-                                            <span>{formData.availableBeds || 0} beds free</span>
+                                            <span>{formData.availableBeds || 0} {t("beds")}</span>
                                         </div>
                                         <div className="md:text-right">
                                             <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                                                Deposit
+                                                {t("deposit")}
                                             </h3>
                                             <div className="text-sm md:text-lg font-bold text-gray-900">
                                                 {formatCurrency(formData.deposit)}
@@ -178,7 +180,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                             <div className="space-y-4">
                                 <h3 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
                                     <div className="w-1 h-8 bg-gradient-to-b from-emerald-500 to-cyan-600 rounded-full"></div>
-                                    <span className="text-base md:text-lg">Amenities</span>
+                                    <span className="text-base md:text-lg">{t("amenities")}</span>
                                 </h3>
                                 <div className="flex flex-wrap gap-3">
                                     {amenities.length > 0 ? amenities.map((amenity) => (
@@ -186,11 +188,11 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                                             key={amenity}
                                             className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-700 font-medium"
                                         >
-                                            {AMENITY_OPTIONS.find((option) => option.value === amenity)?.label || amenity}
+                                            {AMENITY_OPTIONS.find((option) => option.value === amenity)?.[language === "en" ? "labelEn" : "label"] || amenity}
                                         </span>
                                     )) : (
                                         <div className="bg-gray-50 border border-gray-100 rounded-xl p-6 text-sm text-gray-500">
-                                            No amenities added yet.
+                                            {language === "en" ? "No amenities added yet." : "Одоогоор тохижилт нэмээгүй байна."}
                                         </div>
                                     )}
                                 </div>
@@ -199,7 +201,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                             <div className="space-y-4">
                                 <h3 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
                                     <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
-                                    <span className="text-base md:text-lg">Hostel Description</span>
+                                    <span className="text-base md:text-lg">{t("hostelDescription")}</span>
                                 </h3>
                                 <div className="bg-gray-50 border border-gray-100 rounded-xl p-6">
                                     <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
@@ -211,7 +213,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                             <div className="space-y-4">
                                 <h3 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
                                     <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></div>
-                                    <span className="text-base md:text-lg">House Rules</span>
+                                    <span className="text-base md:text-lg">{t("houseRules")}</span>
                                 </h3>
                                 <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 rounded-xl p-6">
                                     <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
@@ -222,7 +224,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                             <div className="space-y-4">
                                 <h3 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
                                     <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-600 rounded-full"></div>
-                                    <span className="text-base md:text-lg">Lease Template</span>
+                                    <span className="text-base md:text-lg">{t("leaseTemplate")}</span>
                                 </h3>
                                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-6">
                                     {formData.leaseTemplateName && (formData.leaseTemplateUrl || formData.leaseTemplateContent) ? (
@@ -233,7 +235,7 @@ const ListingPreview = ({ formData, setIsPreview }) => {
                                         </div>
                                     ) : (
                                         <p className="text-sm text-gray-500">
-                                            No lease template selected.
+                                            {language === "en" ? "No agreement template selected." : "Гэрээний загвар сонгоогүй байна."}
                                         </p>
                                     )}
                                 </div>

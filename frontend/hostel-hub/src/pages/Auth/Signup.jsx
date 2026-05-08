@@ -90,10 +90,10 @@ const SignUp = () => {
   };
   const validateForm =() =>{
     const errors ={
-      fullName: !formData.fullName ? "Enter Full Name" : "",
+      fullName: !formData.fullName ? "Бүтэн нэрээ оруулна уу" : "",
       email: validateEmail(formData.email),
       password: validatePassword(formData.password),
-      role: !formData.role ? "Please select a role" : "",
+      role: !formData.role ? "Хэрэглэгчийн төрлөө сонгоно уу" : "",
       avatar:"",
     };
     //remove empty errors
@@ -151,7 +151,7 @@ const SignUp = () => {
         errors:{
           submit:
             error.response?.data?.message ||
-            "Registration failed. Please try again."
+            "Бүртгүүлэхэд алдаа гарлаа. Дахин оролдоно уу."
         }
       }))
     }
@@ -166,12 +166,12 @@ const SignUp = () => {
             className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center"
           >
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4"/>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Амжилттай бүртгэгдлээ</h2>
             <p className="text-gray-600 mb-4">
-              Welcome to HostelHub. Redirecting you to your dashboard.
+              HostelHub-д тавтай морил. Таны самбар руу шилжүүлж байна.
             </p>
             <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto"/>
-            <p className="text-sm text-gray-500 mt-2">Redirecting to your dashboard...</p>
+            <p className="text-sm text-gray-500 mt-2">Самбар руу шилжүүлж байна...</p>
           </Motion.div>
         </div>
       );
@@ -186,17 +186,17 @@ const SignUp = () => {
       >
         <div className="text-center mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Create Account
+            Бүртгэл үүсгэх
           </h2>
           <p className="text-sm text-gray-600">
-            Create an account to post hostel listings or find the right room
+            Хостелийн зар оруулах эсвэл тохирох өрөө хайхын тулд бүртгэл үүсгэнэ үү
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/*FullName */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name *
+              Бүтэн нэр *
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"/>
@@ -210,7 +210,7 @@ const SignUp = () => {
                     ? "border-red-500"
                     : "border-gray-300"   
                 } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
-                placeholder="Enter your full name"
+                placeholder="Бүтэн нэрээ оруулна уу"
               />
             </div>
             {formState.errors.fullName &&(
@@ -223,7 +223,7 @@ const SignUp = () => {
           {/*Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email *
+              Имэйл *
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"/>
@@ -235,7 +235,7 @@ const SignUp = () => {
                 className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
                   formState.errors.email ? "border-red-500": "border-gray-300"
                 } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
-                placeholder="Email address"
+                placeholder="Имэйл хаяг"
               />
             </div>
             {formState.errors.email &&(
@@ -248,7 +248,7 @@ const SignUp = () => {
           {/*Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password *
+              Нууц үг *
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"/>
@@ -262,7 +262,7 @@ const SignUp = () => {
                     ? "border-red-500"
                     : "border-gray-300"
                 } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
-                placeholder="Create a strong password"
+                placeholder="Хүчтэй нууц үг үүсгэнэ үү"
               />
               <button
                 type="button"
@@ -291,14 +291,14 @@ const SignUp = () => {
           {/*avatar upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Profile Photo (Optional)
+              Профайл зураг (заавал биш)
             </label>
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
                 {formState.avatarPreview ? (
                   <img
                     src={formState.avatarPreview}
-                    alt="Avatar preview"
+                    alt="Профайл зургийн урьдчилсан харагдац"
                     className="w-full h-full object-cover"
                   /> 
                 ) : (
@@ -318,9 +318,9 @@ const SignUp = () => {
                   className="cursor-pointer bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center space-x-2"
                 >
                   <Upload className="w-4 h-4"/>
-                  <span>Upload Image</span>
+                  <span>Зураг оруулах</span>
                 </label>
-                <p className="text-xs text-gray-500 mt-1">JPG or PNG, up to 5MB</p>
+                <p className="text-xs text-gray-500 mt-1">JPG эсвэл PNG, 5MB хүртэл</p>
               </div>
             </div>
             {formState.errors.avatar && (
@@ -333,7 +333,7 @@ const SignUp = () => {
           {/*Role selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              I am a *
+              Би *
             </label>
             <div className="grid grid-cols-2 gap-4">
               <button
@@ -346,9 +346,9 @@ const SignUp = () => {
                 }`}
               >
                 <UserCheck className="w-8 h-8 mx-auto mb-2" />
-                <div className="font-medium">Renter</div>
+                <div className="font-medium">Түрээслэгч</div>
                 <div className="text-xs text-gray-500">
-                  Looking for a room
+                  Өрөө хайж байна
                 </div>
               </button>
               <button 
@@ -361,8 +361,8 @@ const SignUp = () => {
                 }`}
               >
                 <Building2 className="w-8 h-8 mx-auto mb-2"/>
-                <div className="font-medium">Owner</div>
-                <div className="text-xs text-gray-500">Posting hostel listings</div>
+                <div className="font-medium">Эзэмшигч</div>
+                <div className="text-xs text-gray-500">Хостелийн зар оруулна</div>
               </button>
             </div>
             {formState.errors.role && (
@@ -390,21 +390,21 @@ const SignUp = () => {
             {formState.loading ? (
               <>
                 <Loader className="w-5 h-5 animate-spin" />
-                <span>Creating Account...</span>
+                <span>Бүртгэл үүсгэж байна...</span>
               </>
             ) : (
-              <span>Sign Up</span>
+              <span>Бүртгүүлэх</span>
             )}
           </button>
           {/*Login link */}
           <div className="text-center">
             <p className="text-gray-600">
-              Already have an account?{" "}
+              Бүртгэлтэй юу?{" "}
               <a 
                 href={ROUTES.LOGIN}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                Log In
+                Нэвтрэх
               </a>
             </p>
           </div>

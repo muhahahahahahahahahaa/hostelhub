@@ -94,7 +94,7 @@ const Login = () => {
         ...prev,
         loading: false,
         errors: {
-          submit:error.response?.data?.message || 'Login failed. Please check your credentials.'
+          submit:error.response?.data?.message || 'Нэвтрэхэд алдаа гарлаа. Имэйл, нууц үгээ шалгана уу.'
         }
       }))
     }
@@ -108,12 +108,12 @@ const Login = () => {
           className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center"
         >
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4"/>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Login Successful</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Амжилттай нэвтэрлээ</h2>
           <p className="text-gray-600 mb-4">
-            Redirecting you to your dashboard.
+            Таны самбар руу шилжүүлж байна.
           </p>
           <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto"/>
-          <p className="text-sm text-gray-500 mt-2">Redirecting to your dashboard...</p>
+          <p className="text-sm text-gray-500 mt-2">Самбар руу шилжүүлж байна...</p>
         </Motion.div>
       </div>
     );
@@ -127,14 +127,14 @@ const Login = () => {
         className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full"
       >
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Log In</h2>
-          <p className="text-gray-600">Continue with your HostelHub account</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Нэвтрэх</h2>
+          <p className="text-gray-600">HostelHub бүртгэлээрээ үргэлжлүүлнэ үү</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/*email*/}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
+              Имэйл
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"/>
@@ -146,7 +146,7 @@ const Login = () => {
                 className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
                   formState.errors.email ? 'border-red-500': 'border-gray-300'
                 } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
-                placeholder="Email address"
+                placeholder="Имэйл хаяг"
               />
             </div>
             {formState.errors.email &&(
@@ -159,7 +159,7 @@ const Login = () => {
           {/*Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
+              Нууц үг
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"/>
@@ -171,7 +171,7 @@ const Login = () => {
                 className={`w-full pl-10 pr-12 py-3 rounded-lg border ${
                   formState.errors.password ? 'border-red-500' : 'border-gray-300'
                 } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
-                placeholder="Enter your password"
+                placeholder="Нууц үгээ оруулна уу"
               />
               <button
                 type="button"
@@ -206,18 +206,18 @@ const Login = () => {
             {formState.loading ? (
               <>
                 <Loader className="w-5 h-5 animate-spin"/>
-                <span>Logging In</span>
+                <span>Нэвтэрч байна</span>
               </>
             ):(
-              <span>Log In</span>
+              <span>Нэвтрэх</span>
             )}
           </button>
           {/*sign up link */}
           <div className="text-center">
             <p className="text-gray-600">
-              Don&apos;t have an account?{" "}
+              Бүртгэлгүй юу?{" "}
               <a href={ROUTES.SIGNUP} className="text-blue-600 hover:text-blue-700 font-medium">
-                Sign Up
+                Бүртгүүлэх
               </a>
             </p>
           </div>

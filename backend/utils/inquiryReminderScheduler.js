@@ -1,5 +1,6 @@
 const Inquiry = require("../models/Inquiry");
 const Notification = require("../models/Notification");
+const Review = require("../models/Review");
 
 const HOUR_IN_MS = 60 * 60 * 1000;
 const CHECK_INTERVAL_MS = HOUR_IN_MS;
@@ -31,6 +32,17 @@ const createReminderNotification = async ({
     }
 
     try {
+        const existingNotification = await Notification.exists({
+            recipient,
+            inquiry,
+            reminderKind,
+            reminderDateKey,
+        });
+
+        if (existingNotification) {
+            return;
+        }
+
         await Notification.create({
             recipient,
             inquiry,
@@ -107,6 +119,23 @@ const sendInquiryReminderNotifications = async () => {
                     message: `${listingTitle} ends today.`,
                 }),
             ]);
+        }
+
+        if (daysUntilEnd < 0 && inquiry.payment?.status === "paid") {
+            const existingReview = await Review.exists({ inquiry: inquiry._id });
+            if (existingReview) {
+                continue;
+            }
+
+            await createReminderNotification({
+                recipient: inquiry.renter,
+                inquiry: inquiry._id,
+                listing: listingId,
+                reminderKind: "review_available",
+                reminderDateKey,
+                title: "Review your completed rental",
+                message: `${listingTitle} rental has ended. You can leave a review now.`,
+            });
         }
     }
 };

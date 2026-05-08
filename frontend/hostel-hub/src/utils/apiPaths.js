@@ -20,6 +20,7 @@ export const API_PATHS = {
 
     DASHBOARD: {
         OVERVIEW: "/api/analytics/overview",
+        WITHDRAW: "/api/analytics/wallet/withdraw",
     },
 
     LISTINGS: {
@@ -64,6 +65,12 @@ export const API_PATHS = {
         GET_MINE: "/api/notifications",
         MARK_READ: (id) => `/api/notifications/${id}/read`,
         MARK_ALL_READ: "/api/notifications/read-all",
+    },
+
+    REVIEWS: {
+        GET_FOR_LISTING: (id) => `/api/reviews/listing/${id}`,
+        CREATE: (id) => `/api/reviews/listing/${id}`,
+        UPDATE: (id) => `/api/reviews/${id}`,
     },
 
     IMAGE: {

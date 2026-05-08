@@ -11,9 +11,11 @@ import SearchHeader from "./components/SearchHeader";
 import Navbar from "../../components/layout/Navbar";
 import ListingCard from "../../components/Cards/ListingCard";
 import { ROUTES } from "../../utils/routePaths";
+import { usePreferences } from "../../context/PreferencesContext";
 
 const BrowseListings = () => {
   const { user } = useAuth();
+  const { t } = usePreferences();
   const navigate = useNavigate();
 
   const [listings, setListings] = useState([]);
@@ -63,13 +65,13 @@ const BrowseListings = () => {
         setListings(listingData);
       } catch (error) {
         console.error("Error fetching listings:", error);
-        setFetchError("Failed to load listings. Please try again.");
+        setFetchError(t("listingsLoadFailed"));
         setListings([]);
       } finally {
         setLoading(false);
       }
     },
-    [user],
+    [t, user],
   );
 
   useEffect(() => {
@@ -108,23 +110,23 @@ const BrowseListings = () => {
     }
 
     if (user.role !== "renter") {
-      toast.error("Only renter accounts can save listings.");
+      toast.error(t("rentersOnlySave"));
       return;
     }
 
     try {
       if (isSaved) {
         await axiosInstance.delete(API_PATHS.SAVED_LISTINGS.UNSAVE(listingId));
-        toast.success("Listing removed from saved items.");
+        toast.success(t("listingUnsaved"));
       } else {
         await axiosInstance.post(API_PATHS.SAVED_LISTINGS.SAVE(listingId));
-        toast.success("Listing saved.");
+        toast.success(t("listingSaved"));
       }
 
       await loadListings(filters);
     } catch (error) {
       console.error("Error toggling saved listing:", error);
-      toast.error("Failed to update saved listings.");
+      toast.error(t("savedListingsUpdateFailed"));
     }
   };
 
@@ -147,7 +149,7 @@ const BrowseListings = () => {
             <div className="hidden lg:block w-80 flex-shrink-0">
               <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 p-6 sticky top-20">
                 <h3 className="font-bold text-gray-900 text-xl mb-6">
-                  Listing filters
+                  {t("listingFilters")}
                 </h3>
                 <FilterContent
                   toggleSection={toggleSection}
@@ -163,9 +165,9 @@ const BrowseListings = () => {
               <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 gap-4">
                 <div>
                   <p className="text-gray-600 text-sm lg:text-base">
-                    Total{" "}
+                    {t("total")}{" "}
                     <span className="font-bold text-gray-900">{listings.length}</span>{" "}
-                    listing{listings.length === 1 ? "" : "s"}
+                    {t("listing")}
                   </p>
                 </div>
 
@@ -176,7 +178,7 @@ const BrowseListings = () => {
                     className="lg:hidden flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     <Filter className="w-4 h-4" />
-                    Filters
+                    {t("listingFilters")}
                   </button>
 
                   <div className="flex items-center gap-3 lg:gap-4">
@@ -217,10 +219,10 @@ const BrowseListings = () => {
               {listings.length === 0 ? (
                 <div className="text-center py-16 lg:py-20 bg-white/60 backdrop-blur-xl rounded-2xl border border-white/20">
                   <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3">
-                    No listings found
+                    {t("noListingsMatch")}
                   </h3>
                   <p className="text-gray-600">
-                    Try adjusting your filters and searching again.
+                    {t("adjustFilters")}
                   </p>
                 </div>
               ) : (
@@ -254,7 +256,7 @@ const BrowseListings = () => {
           />
           <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="font-bold text-gray-900 text-lg">Filters</h3>
+              <h3 className="font-bold text-gray-900 text-lg">{t("listingFilters")}</h3>
               <button
                 type="button"
                 onClick={() => setShowMobileFilters(false)}

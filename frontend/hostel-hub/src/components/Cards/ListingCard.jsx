@@ -5,12 +5,15 @@ import {
     Coins,
     MapPin,
     MessageSquare,
+    Star,
     Users,
 } from "lucide-react";
 import moment from "moment";
 import { useAuth } from "../../context/AuthContext";
+import { usePreferences } from "../../context/PreferencesContext";
 import StatusBadge from "../StatusBadge";
 import { formatCompactCurrency } from "../../utils/helper";
+import { translateCategory, translateRoomType } from "../../utils/locale";
 
 const ListingCard = ({
     listing,
@@ -22,13 +25,17 @@ const ListingCard = ({
     hideInquiryAction = false,
 }) => {
     const {user} = useAuth();
+    const { language, t } = usePreferences();
     const hostelName =
-        listing?.owner?.hostelName || listing?.owner?.name || "Hostel Owner";
+        listing?.owner?.hostelName || listing?.owner?.name || t("hostelOwner");
     const cardImage = listing?.images?.[0] || listing?.owner?.hostelLogo || "";
     const canStartConversation = !user || user.role === "renter";
     const canShowInquiryState =
         canStartConversation &&
         (Boolean(onInquire) || Boolean(onChat) || Boolean(listing?.inquiryStatus) || listing?.isClosed);
+    const reviewSummary = listing?.reviewSummary || {};
+    const averageRating = Number(reviewSummary.averageRating || 0);
+    const completedRentalCount = Number(reviewSummary.completedRentalCount || 0);
 
   return (
     <div 
@@ -40,7 +47,7 @@ const ListingCard = ({
                 {cardImage ? (
                     <img
                         src={cardImage}
-                        alt={listing?.title || "Listing"}
+                        alt={listing?.title || t("listing")}
                         className="w-14 h-14 object-cover rounded-2xl border-4 border-white/20 shadow-lg"
                     />
                 ) : (
@@ -80,14 +87,22 @@ const ListingCard = ({
                     {listing?.location}
                 </span>
                 <span className="px-3 py-1 rounded-full font-medium bg-blue-100 text-blue-800">
-                    {listing?.roomType}
+                    {translateRoomType(listing?.roomType, language)}
                 </span>
                 <span className="flex items-center gap-1.5 bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-medium">
-                    {listing?.category}
+                    {translateCategory(listing?.category, language)}
                 </span>
                 <span className="flex items-center gap-1.5 bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium">
                     <Users className="w-3 h-3" />
-                    {listing?.availableBeds || 0} beds
+                    {listing?.availableBeds || 0} {t("beds")}
+                </span>
+                <span className="flex items-center gap-1.5 bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium dark:bg-amber-950/60 dark:text-amber-200">
+                    <Star className="w-3 h-3 fill-current" />
+                    {averageRating > 0 ? averageRating.toFixed(1) : "0.0"}
+                </span>
+                <span className="flex items-center gap-1.5 bg-slate-100 text-slate-700 px-3 py-1 rounded-full font-medium dark:bg-slate-800 dark:text-slate-200">
+                    <Users className="w-3 h-3" />
+                    {completedRentalCount} {t("rentedCount")}
                 </span>
             </div>
         </div>
@@ -98,7 +113,7 @@ const ListingCard = ({
                     <Calendar className="w-3.5 h-3.5" />
                     {listing?.createdAt
                         ? moment(listing.createdAt).format("Do MMM YYYY")
-                        : "N/A"
+                        : t("noData")
                     }
                 </span>
             </div>
@@ -108,14 +123,14 @@ const ListingCard = ({
             <div>
                 <div className="text-blue-600 font-semibold text-lg flex items-center gap-2">
                     <Coins className="w-4 h-4" />
-                    {formatCompactCurrency(listing?.dailyRent ?? listing?.monthlyRent)}/day
+                    {formatCompactCurrency(listing?.dailyRent ?? listing?.monthlyRent)}/{t("perDay")}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
-                    Deposit: {formatCompactCurrency(listing?.deposit)}
+                    {t("deposit")}: {formatCompactCurrency(listing?.deposit)}
                 </div>
                 {listing?.availableFrom || listing?.availableUntil ? (
                     <div className="text-xs text-gray-500 mt-1">
-                        Available: {listing?.availableFrom ? moment(listing.availableFrom).format("Do MMM YYYY") : "Now"} - {listing?.availableUntil ? moment(listing.availableUntil).format("Do MMM YYYY") : "Open"}
+                        {t("available")}: {listing?.availableFrom ? moment(listing.availableFrom).format("Do MMM YYYY") : t("now")} - {listing?.availableUntil ? moment(listing.availableUntil).format("Do MMM YYYY") : t("openEnded")}
                     </div>
                 ) : null}
             </div>
@@ -130,8 +145,8 @@ const ListingCard = ({
                                     e.stopPropagation();
                                     onChat();
                                 }}
-                                aria-label="Open chat"
-                                title="Chat"
+                                aria-label={t("openChat")}
+                                title={t("chats")}
                             >
                                 <MessageSquare className="h-4 w-4" />
                             </button>
@@ -153,8 +168,8 @@ const ListingCard = ({
                                 disabled={Boolean(listing?.inquiryStatus)}
                             >
                                 {listing?.inquiryStatus
-                                    ? "Booking Request Sent"
-                                    : "Request Booking Now"}
+                                    ? t("inquirySent")
+                                    : t("sendInquiry")}
                             </button>
                         ) : null}
                     </div>
@@ -163,7 +178,7 @@ const ListingCard = ({
                         <StatusBadge status={listing?.inquiryStatus} />
                     ) : listing?.isClosed ? (
                         <span className="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
-                            Closed
+                            {t("closedListing")}
                         </span>
                     ) : null}
                 </div>

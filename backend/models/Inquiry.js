@@ -43,6 +43,11 @@ const inquirySchema = new mongoose.Schema(
             default: "",
         },
         payment: {
+            provider: {
+                type: String,
+                enum: ["qpay", "byl"],
+                default: "byl",
+            },
             status: {
                 type: String,
                 enum: ["idle", "pending", "paid", "expired", "cancelled"],
@@ -59,6 +64,21 @@ const inquirySchema = new mongoose.Schema(
                 default: "",
             },
             senderInvoiceNo: {
+                type: String,
+                trim: true,
+                default: "",
+            },
+            checkoutId: {
+                type: String,
+                trim: true,
+                default: "",
+            },
+            checkoutUrl: {
+                type: String,
+                trim: true,
+                default: "",
+            },
+            clientReferenceId: {
                 type: String,
                 trim: true,
                 default: "",

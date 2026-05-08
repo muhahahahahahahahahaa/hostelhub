@@ -1,9 +1,14 @@
 import { Clock, MessageSquare } from "lucide-react";
 import moment from "moment";
 import { getInitials } from "../../utils/helper";
+import { usePreferences } from "../../context/PreferencesContext";
 
 const ChatDashboardCard = ({ chat, onClick }) => {
+  const { language, t } = usePreferences();
+
   if (!chat?.renter) return null;
+
+  const listingTitle = chat?.listing?.title || t("listing");
 
   return (
     <button
@@ -31,15 +36,15 @@ const ChatDashboardCard = ({ chat, onClick }) => {
             </p>
             {chat.ownerUnreadCount > 0 ? (
               <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-700">
-                {chat.ownerUnreadCount} new
+                {chat.ownerUnreadCount} {t("new")}
               </span>
             ) : null}
           </div>
           <p className="text-sm text-gray-500 truncate">
-            Chat from {chat?.listing?.title || "listing"}
+            {language === "en" ? `${listingTitle} chat` : `${listingTitle}-аас ирсэн чат`}
           </p>
           <p className="mt-1 text-sm text-gray-700 truncate">
-            {chat.lastMessage || "No messages yet"}
+            {chat.lastMessage || t("noMessagesYet")}
           </p>
         </div>
       </div>
@@ -47,7 +52,7 @@ const ChatDashboardCard = ({ chat, onClick }) => {
       <div className="flex flex-col items-end gap-2 text-xs text-gray-500 shrink-0">
         <span className="inline-flex items-center gap-1">
           <MessageSquare className="h-3.5 w-3.5" />
-          Chat
+          {t("chats")}
         </span>
         <span className="inline-flex items-center gap-1">
           <Clock className="h-3.5 w-3.5" />

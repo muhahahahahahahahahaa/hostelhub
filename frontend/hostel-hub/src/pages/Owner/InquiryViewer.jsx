@@ -17,6 +17,8 @@ import { getInitials } from "../../utils/helper";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import InquiryPreview from "../../components/Cards/InquiryPreview";
 import { ROUTES } from "../../utils/routePaths";
+import { translateCategory, translateRoomType, translateStatus } from "../../utils/locale";
+import { usePreferences } from "../../context/PreferencesContext";
 
 const STATUS_OPTIONS = ["New", "Contacted", "Confirmed", "Declined"];
 
@@ -28,6 +30,7 @@ const statusSelectClasses = {
 };
 
 const InquiryViewer = () => {
+  const { language, t } = usePreferences();
   const location = useLocation();
   const navigate = useNavigate();
   const selectedListingId = location.state?.listingId || location.state?.jobId || null;
@@ -85,10 +88,10 @@ const InquiryViewer = () => {
         navigate(`${ROUTES.CHATS}?chatId=${response.data._id}`);
       } catch (error) {
         console.error("Failed to open inquiry chat", error);
-        toast.error(error?.response?.data?.message || "Failed to open chat.");
+        toast.error(error?.response?.data?.message || t("failedOpenChat"));
       }
     },
-    [navigate]
+    [navigate, t]
   );
 
   const handleStatusChange = useCallback(
@@ -114,7 +117,7 @@ const InquiryViewer = () => {
 
       try {
         await axiosInstance.put(API_PATHS.INQUIRIES.UPDATE_STATUS(inquiryId), { status });
-        toast.success("Inquiry status updated");
+        toast.success(t("statusUpdated"));
       } catch (error) {
         console.error("Failed to update inquiry status", error);
         setInquiries((current) =>
@@ -129,12 +132,12 @@ const InquiryViewer = () => {
           );
         }
 
-        toast.error(error?.response?.data?.message || "Failed to update inquiry status.");
+        toast.error(error?.response?.data?.message || t("statusUpdateFailed"));
       } finally {
         setUpdatingInquiryId(null);
       }
     },
-    [inquiries, navigate, selectedInquiry],
+    [inquiries, navigate, selectedInquiry, t],
   );
 
   const groupedInquiries = useMemo(() => {
@@ -172,7 +175,7 @@ const InquiryViewer = () => {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading inquiries...</p>
+            <p className="mt-4 text-gray-600">{t("loadingInquiries")}</p>
           </div>
         </div>
       ) : (
@@ -185,13 +188,13 @@ const InquiryViewer = () => {
                 className="group flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-white bg-white/50 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 border border-gray-200 hover:border-transparent rounded-xl transition-all duration-300 shadow-lg shadow-gray-100 hover:shadow-xl"
               >
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                <span>Back</span>
+                <span>{t("back")}</span>
               </button>
 
               <div>
-                <h1 className="text-2xl font-semibold text-gray-900">Inquiries Overview</h1>
+                <h1 className="text-2xl font-semibold text-gray-900">{t("inquiriesOverview")}</h1>
                 <p className="text-sm text-gray-500">
-                  Review renter interest across your hostel listings.
+                  {t("inquiriesOverviewSubtitle")}
                 </p>
               </div>
             </div>
@@ -199,8 +202,8 @@ const InquiryViewer = () => {
             <div className="self-start rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Status Filter</p>
-                  <p className="text-xs text-gray-500">Show only selected inquiries</p>
+                  <p className="text-sm font-semibold text-gray-900">{t("filterByStatus")}</p>
+                  <p className="text-xs text-gray-500">{t("showSelectedStatuses")}</p>
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap gap-3">
@@ -218,7 +221,7 @@ const InquiryViewer = () => {
                         onChange={() => toggleStatusFilter(status)}
                         className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span>{status}</span>
+                      <span>{translateStatus(status, language)}</span>
                     </label>
                   );
                 })}
@@ -230,20 +233,20 @@ const InquiryViewer = () => {
             <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
               <Users className="mx-auto h-24 w-24 text-gray-300" />
               <h3 className="mt-4 text-lg font-medium text-gray-900">
-                No inquiries available
+                {t("noInquiries")}
               </h3>
               <p className="mt-2 text-gray-500">
-                New renter inquiries will appear here as soon as they arrive.
+                {t("noInquiriesSubtitle")}
               </p>
             </div>
           ) : !hasVisibleInquiries ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
               <Users className="mx-auto h-24 w-24 text-gray-300" />
               <h3 className="mt-4 text-lg font-medium text-gray-900">
-                No inquiries match this filter
+                {t("noFilteredInquiries")}
               </h3>
               <p className="mt-2 text-gray-500">
-                Try turning on more statuses from the filter on the right.
+                {t("noFilteredInquiriesSubtitle")}
               </p>
             </div>
           ) : (
@@ -260,17 +263,17 @@ const InquiryViewer = () => {
                             <span className="text-sm">{listing.location}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <span className="text-sm">{listing.roomType}</span>
+                            <span className="text-sm">{translateRoomType(listing.roomType, language)}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <span className="text-sm">{listing.category}</span>
+                            <span className="text-sm">{translateCategory(listing.category, language)}</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2">
                         <span className="text-sm text-white font-medium">
-                          {inquiryItems.length} inquiries
+                          {inquiryItems.length} {t("inquirySingular")}
                         </span>
                       </div>
                     </div>
@@ -309,7 +312,7 @@ const InquiryViewer = () => {
                             <div className="flex items-center gap-1 mt-1 text-gray-500 text-xs">
                               <Calendar className="h-3 w-3" />
                               <span>
-                                Inquiry sent {moment(inquiry.createdAt).format("Do MMM YYYY")}
+                                {t("inquirySentAt")}: {moment(inquiry.createdAt).format("Do MMM YYYY")}
                               </span>
                             </div>
                           </div>
@@ -327,7 +330,7 @@ const InquiryViewer = () => {
                             >
                               {STATUS_OPTIONS.map((status) => (
                                 <option key={status} value={status}>
-                                  {status}
+                                  {translateStatus(status, language)}
                                 </option>
                               ))}
                             </select>
@@ -341,7 +344,7 @@ const InquiryViewer = () => {
                             className="inline-flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-100 transition-colors"
                           >
                             <MessageSquare className="h-4 w-4" />
-                            Chat
+                            {t("chats")}
                           </button>
                           <button
                             type="button"
@@ -349,7 +352,7 @@ const InquiryViewer = () => {
                             className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
                           >
                             <Eye className="h-4 w-4" />
-                            View Inquiry
+                            {t("viewInquiry")}
                           </button>
                         </div>
                       </div>

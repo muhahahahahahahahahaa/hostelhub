@@ -10,12 +10,14 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import EditOwnerProfile from './EditOwnerProfile';
 import { getInitials } from '../../utils/helper';
 import { ROUTES } from '../../utils/routePaths';
+import { usePreferences } from '../../context/PreferencesContext';
 
 const normalizeTemplateName = (value) => value.trim().toLowerCase();
 
 const OwnerProfilePage = () => {
 
   const { user, updateUser } = useAuth();
+  const { t, language } = usePreferences();
   const navigate = useNavigate();
 
   const [profileData, setProfileData] = useState({
@@ -45,7 +47,7 @@ const OwnerProfilePage = () => {
       const currentTemplates = prev.leaseAgreementTemplates || [];
 
       if (currentTemplates.length <= 1) {
-        toast.error("At least one template is required.");
+        toast.error(language === "en" ? "At least one lease template is required." : "Дор хаяж нэг гэрээний загвар шаардлагатай.");
         return prev;
       }
 
@@ -87,7 +89,7 @@ const OwnerProfilePage = () => {
 
   const handleSave = async () => {
     if ((formData.leaseAgreementTemplates || []).length === 0) {
-      toast.error("At least one template is required.");
+      toast.error(language === "en" ? "At least one lease template is required." : "Дор хаяж нэг гэрээний загвар шаардлагатай.");
       return;
     }
 
@@ -96,7 +98,7 @@ const OwnerProfilePage = () => {
     );
 
     if (hasBlankTemplateName) {
-      toast.error("Each template must have a name and either a file or contract clauses.");
+      toast.error(language === "en" ? "Each lease template must have a name and either a file or clauses." : "Гэрээний загвар бүр нэртэй, мөн файл эсвэл гэрээний заалттай байх ёстой.");
       return;
     }
 
@@ -105,7 +107,7 @@ const OwnerProfilePage = () => {
       .filter(Boolean);
 
     if (normalizedNames.length !== new Set(normalizedNames).size) {
-      toast.error("Template names must be unique.");
+      toast.error(language === "en" ? "Lease template names must be unique." : "Гэрээний загварын нэр давхцахгүй байх ёстой.");
       return;
     }
 
@@ -117,7 +119,7 @@ const OwnerProfilePage = () => {
         formData
       );
       if (response.status === 200){
-        toast.success("Profile details updated successfully")
+        toast.success(language === "en" ? "Profile updated successfully." : "Профайлын мэдээлэл амжилттай шинэчлэгдлээ")
         setProfileData(response.data);
         updateUser(response.data)
         setEditMode(false);
@@ -155,15 +157,15 @@ const OwnerProfilePage = () => {
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             {/*header */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6 flex justify-between items-center">
-              <h1 className="text-xl font-medium text-white">
-                Owner Profile
+                <h1 className="text-xl font-medium text-white">
+                {t("ownerProfileTitle")}
               </h1>
               <button
                 onClick={() => setEditMode(true)}
                 className="bg-white/10 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
               >
                 <Edit3 className="w-4 h-4" />
-                <span>Edit Profile</span>
+                <span>{t("editProfile")}</span>
               </button>
             </div>
 
@@ -173,7 +175,7 @@ const OwnerProfilePage = () => {
                 {/*personal information */}
                 <div className="space-y-6">
                   <h2 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
-                    Personal Information
+                    {t("personalInfo")}
                   </h2>
 
                   {/*avatar and name  */}
@@ -181,13 +183,13 @@ const OwnerProfilePage = () => {
                     {profileData.avatar ? (
                       <img
                         src={profileData.avatar}
-                        alt="Avatar"
+                        alt={t("profileImage")}
                         className="w-20 h-20 rounded-full object-cover border-4 border-blue-50"
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-full border-4 border-blue-50 bg-blue-100 flex items-center justify-center">
                         <span className="text-lg font-semibold text-blue-700">
-                          {getInitials(profileData.name || "Owner")}
+                          {getInitials(profileData.name || t("ownerFallback"))}
                         </span>
                       </div>
                     )}
@@ -206,7 +208,7 @@ const OwnerProfilePage = () => {
                 {/*company information */}
                 <div className="space-y-6">
                   <h2 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
-                    Hostel Information
+                    {t("hostelInfo")}
                   </h2>
 
                   {/*hostel logo and name */}
@@ -214,7 +216,7 @@ const OwnerProfilePage = () => {
                     {profileData.hostelLogo ? (
                       <img
                         src={profileData.hostelLogo}
-                        alt="Hostel Logo"
+                        alt={t("hostelLogo")}
                         className="w-20 h-20 rounded-lg object-cover border-4 border-blue-50"
                       />
                     ) : (
@@ -224,11 +226,11 @@ const OwnerProfilePage = () => {
                     )}
                     <div>
                       <h3 className="text-lg font-semibold text-gray-800">
-                        {profileData.hostelName || "Hostel brand"}
+                        {profileData.hostelName || t("hostelName")}
                       </h3>
                       <div className="flex items-center text-sm text-gray-600 mt-1">
                         <Building2 className="w-4 h-4 mr-2" />
-                        <span>Hostel brand</span>
+                        <span>{t("hostelIntro")}</span>
                       </div>
                     </div>
                   </div>
@@ -238,16 +240,16 @@ const OwnerProfilePage = () => {
               {/*hostel description */}
               <div className="mt-8">
                 <h2 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2 mb-6">
-                  About Hostel
+                  {t("aboutHostel")}
                 </h2>
                 <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-6 rounded-lg">
-                  {profileData.hostelDescription || "Hostel description not added yet."}
+                  {profileData.hostelDescription || t("noHostelDescription")}
                 </p>
               </div>
 
               <div className="mt-8">
                 <h2 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2 mb-6">
-                  Lease Agreement Templates
+                  {t("leaseTemplates")}
                 </h2>
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-6">
                   {profileData.leaseAgreementTemplates?.length ? (
@@ -266,7 +268,7 @@ const OwnerProfilePage = () => {
                               className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
                             >
                               <FileText className="h-4 w-4" />
-                              <span>Open DOCX template</span>
+                              <span>{t("openDocxTemplate")}</span>
                               <ExternalLink className="h-4 w-4" />
                             </a>
                           ) : null}
@@ -277,14 +279,14 @@ const OwnerProfilePage = () => {
                             }
                             className="mt-3 inline-flex rounded-lg border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors"
                           >
-                            View Template
+                            {t("viewTemplate")}
                           </button>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <p className="text-sm text-gray-500">
-                      No lease agreement templates uploaded yet.
+                      {t("noLeaseTemplates")}
                     </p>
                   )}
                 </div>

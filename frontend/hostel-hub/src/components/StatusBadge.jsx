@@ -1,4 +1,8 @@
+import { translateStatus } from "../utils/locale";
+import { usePreferences } from "../context/PreferencesContext";
+
 const StatusBadge = ({status}) => {
+    const { language } = usePreferences();
     const statusConfig = {
         New: "bg-sky-100 text-sky-800",
         Contacted: "bg-amber-100 text-amber-800",
@@ -12,7 +16,7 @@ const StatusBadge = ({status}) => {
                 statusConfig[status] || "bg-gray-100 text-gray-800"
             }`}
         >
-            {status}
+            {translateStatus(status, language)}
         </span>
     )
 }

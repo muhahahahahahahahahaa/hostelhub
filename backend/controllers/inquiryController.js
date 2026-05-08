@@ -9,7 +9,13 @@ const Notification = require("../models/Notification");
 const User = require("../models/User");
 const Chat = require("../models/Chat");
 const { getOwnerLeaseTemplates } = require("../utils/leaseTemplates");
+const { convertToPdf } = require("../utils/libreOffice");
 const { createQPayInvoice, checkQPayPayment } = require("../utils/qpay");
+const {
+    getBylWebhookSecret,
+    createBylCheckout,
+    checkBylCheckout,
+} = require("../utils/byl");
 
 const VALID_STATUSES = ["New", "Contacted", "Confirmed", "Declined"];
 const execFileAsync = promisify(execFile);
@@ -940,14 +946,10 @@ const generateInquiryAgreementPdf = async ({ inquiry, req, requestBody = {} }) =
         inquiry: previewInquiry,
     });
 
-    await execFileAsync("libreoffice", [
-        "--headless",
-        "--convert-to",
-        "pdf",
-        "--outdir",
-        TEMPLATE_PREVIEW_DIR,
-        generatedDocxPath,
-    ]);
+    await convertToPdf({
+        sourcePath: generatedDocxPath,
+        outputDir: TEMPLATE_PREVIEW_DIR,
+    });
 
     const generatedLibreOfficePdfPath = path.join(
         TEMPLATE_PREVIEW_DIR,
@@ -1097,18 +1099,191 @@ const markInquiryPaymentExpired = async (inquiry) => {
     return inquiry;
 };
 
+const getConfiguredPaymentProvider = () => {
+    const configuredProvider = String(process.env.PAYMENT_PROVIDER || "").trim().toLowerCase();
+
+    if (["byl", "qpay"].includes(configuredProvider)) {
+        return configuredProvider;
+    }
+
+    if (process.env.BYL_PROJECT_ID && (process.env.BYL_TOKEN || process.env.BYL_API_TOKEN)) {
+        return "byl";
+    }
+
+    return "qpay";
+};
+
+const getInquiryPaymentProvider = (payment = {}) => {
+    const provider = String(payment?.provider || "").trim().toLowerCase();
+
+    if (!payment?.checkoutId && !payment?.checkoutUrl && (payment?.qrImage || payment?.qrText)) {
+        return "qpay";
+    }
+
+    if (provider === "qpay" || provider === "byl") {
+        return provider;
+    }
+
+    if (payment?.checkoutId || payment?.checkoutUrl || payment?.clientReferenceId) {
+        return "byl";
+    }
+
+    return "qpay";
+};
+
+const createAgreementPayment = async ({ inquiry, amount }) => {
+    const provider = getConfiguredPaymentProvider();
+
+    if (provider === "byl") {
+        const checkout = await createBylCheckout({
+            inquiryId: inquiry._id,
+            amount,
+            description: `${inquiry.listing?.title || "Hostel booking"} payment`,
+            customerEmail: inquiry.renter?.email || "",
+        });
+
+        return {
+            provider,
+            status: "pending",
+            amount,
+            invoiceId: checkout.checkoutId,
+            senderInvoiceNo: checkout.clientReferenceId,
+            checkoutId: checkout.checkoutId,
+            checkoutUrl: checkout.checkoutUrl,
+            clientReferenceId: checkout.clientReferenceId,
+            qrText: "",
+            qrImage: "",
+            urls: checkout.checkoutUrl
+                ? [
+                      {
+                          name: "Byl checkout",
+                          description: "Open Byl payment page",
+                          link: checkout.checkoutUrl,
+                      },
+                  ]
+                : [],
+            dueAt: checkout.expiresAt
+                ? new Date(checkout.expiresAt)
+                : new Date(Date.now() + PAYMENT_WINDOW_MS),
+            lastCheckedAt: new Date(),
+            paidAt: null,
+        };
+    }
+
+    const createdPayment = await createQPayInvoice({
+        inquiryId: inquiry._id,
+        amount,
+        description: `${inquiry.listing?.title || "Hostel booking"} payment`,
+        customerCode: inquiry.renter?.email || inquiry.renter?.name || String(inquiry.renter),
+    });
+
+    return {
+        provider,
+        status: "pending",
+        amount,
+        invoiceId: createdPayment.invoiceId,
+        senderInvoiceNo: createdPayment.senderInvoiceNo,
+        checkoutId: "",
+        checkoutUrl: "",
+        clientReferenceId: "",
+        qrText: createdPayment.qrText,
+        qrImage: createdPayment.qrImage,
+        urls: createdPayment.urls,
+        dueAt: new Date(Date.now() + PAYMENT_WINDOW_MS),
+        lastCheckedAt: new Date(),
+        paidAt: null,
+    };
+};
+
+const checkAgreementPaymentStatus = async (payment = {}) => {
+    const provider = getInquiryPaymentProvider(payment);
+
+    if (provider === "byl") {
+        const checkoutId = payment.checkoutId || payment.invoiceId;
+        const checkoutCheck = await checkBylCheckout({ checkoutId });
+
+        return {
+            provider,
+            paid: checkoutCheck.paid,
+            expired: checkoutCheck.expired,
+            paidAt: checkoutCheck.paidAt,
+            checkoutUrl: checkoutCheck.checkoutUrl,
+        };
+    }
+
+    return {
+        provider,
+        ...(await checkQPayPayment({
+            invoiceId: payment.invoiceId,
+        })),
+    };
+};
+
+const buildRequestContext = (req) => {
+    const configuredBaseUrl = String(
+        process.env.BACKEND_PUBLIC_URL || process.env.API_PUBLIC_URL || ""
+    ).trim();
+
+    if (!configuredBaseUrl) {
+        return req;
+    }
+
+    try {
+        const parsedUrl = new URL(configuredBaseUrl);
+
+        return {
+            protocol: parsedUrl.protocol.replace(/:$/, ""),
+            get: (headerName) => {
+                if (String(headerName || "").toLowerCase() === "host") {
+                    return parsedUrl.host;
+                }
+
+                return req.get(headerName);
+            },
+        };
+    } catch {
+        return req;
+    }
+};
+
+const verifyBylWebhookSignature = ({ rawBody, signature }) => {
+    const secret = getBylWebhookSecret();
+
+    if (!secret) {
+        throw new Error("Byl webhook secret is not configured");
+    }
+
+    if (!signature) {
+        return false;
+    }
+
+    const expectedSignature = crypto
+        .createHmac("sha256", secret)
+        .update(rawBody)
+        .digest("hex");
+    const receivedBuffer = Buffer.from(String(signature), "utf8");
+    const expectedBuffer = Buffer.from(expectedSignature, "utf8");
+
+    return (
+        receivedBuffer.length === expectedBuffer.length &&
+        crypto.timingSafeEqual(receivedBuffer, expectedBuffer)
+    );
+};
+
 const getPaymentErrorStatus = (error) => {
     const message = String(error?.message || "").toLowerCase();
 
     if (
         message.includes("access token may be invalid or expired") ||
+        message.includes("authentication failed") ||
+        message.includes("unauthenticated") ||
         message.includes("хандах эрхгүй") ||
         message.includes("нэвтрэнэ үү")
     ) {
         return 401;
     }
 
-    if (message.includes("invoice") || message.includes("qpay")) {
+    if (message.includes("invoice") || message.includes("qpay") || message.includes("byl")) {
         return 400;
     }
 
@@ -1444,25 +1619,11 @@ exports.initiateAgreementPayment = async (req, res) => {
         }
 
         const amount = getInquiryPaymentAmount(inquiry);
-        const createdPayment = await createQPayInvoice({
-            inquiryId: inquiry._id,
-            amount,
-            description: `${inquiry.listing?.title || "Hostel booking"} payment`,
-            customerCode: inquiry.renter?.email || inquiry.renter?.name || String(inquiry.renter),
-        });
+        const createdPayment = await createAgreementPayment({ inquiry, amount });
 
         inquiry.payment = {
             ...(inquiry.payment?.toObject?.() || inquiry.payment || {}),
-            status: "pending",
-            amount,
-            invoiceId: createdPayment.invoiceId,
-            senderInvoiceNo: createdPayment.senderInvoiceNo,
-            qrText: createdPayment.qrText,
-            qrImage: createdPayment.qrImage,
-            urls: createdPayment.urls,
-            dueAt: new Date(Date.now() + PAYMENT_WINDOW_MS),
-            lastCheckedAt: new Date(),
-            paidAt: null,
+            ...createdPayment,
         };
         await inquiry.save();
 
@@ -1514,20 +1675,24 @@ exports.checkAgreementPayment = async (req, res) => {
             });
         }
 
-        const paymentCheck = await checkQPayPayment({
-            invoiceId: inquiry.payment.invoiceId,
-        });
+        const paymentCheck = await checkAgreementPaymentStatus(inquiry.payment);
 
         inquiry.payment = {
             ...(inquiry.payment?.toObject?.() || inquiry.payment || {}),
+            provider: paymentCheck.provider,
             lastCheckedAt: new Date(),
         };
 
         if (paymentCheck.paid) {
             inquiry.payment.status = "paid";
             inquiry.payment.paidAt = paymentCheck.paidAt ? new Date(paymentCheck.paidAt) : new Date();
+            if (paymentCheck.checkoutUrl) {
+                inquiry.payment.checkoutUrl = paymentCheck.checkoutUrl;
+            }
             await inquiry.save();
             await finalizeInquiryAgreementIfReady({ inquiry, req });
+        } else if (paymentCheck.expired) {
+            await markInquiryPaymentExpired(inquiry);
         } else {
             await inquiry.save();
         }
@@ -1538,6 +1703,81 @@ exports.checkAgreementPayment = async (req, res) => {
             finalAgreementPdfUrl: inquiry.finalAgreementPdfUrl,
         });
     } catch (err) {
+        res.status(getPaymentErrorStatus(err)).json({ message: err.message });
+    }
+};
+
+exports.handleBylWebhook = async (req, res) => {
+    try {
+        const rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body || {}));
+        const signature = req.get("Byl-Signature");
+
+        if (!verifyBylWebhookSignature({ rawBody, signature })) {
+            return res.status(401).json({ message: "Invalid Byl webhook signature" });
+        }
+
+        const event = JSON.parse(rawBody.toString("utf8"));
+
+        if (event?.type !== "checkout.completed") {
+            return res.json({ received: true });
+        }
+
+        const checkout = event?.data?.object || {};
+        const checkoutId = String(checkout?.id || "");
+        const clientReferenceId = String(checkout?.client_reference_id || "");
+        const inquiryIdFromReference = clientReferenceId.startsWith("inquiry:")
+            ? clientReferenceId.replace("inquiry:", "")
+            : "";
+        const canQueryInquiryId = /^[0-9a-fA-F]{24}$/.test(inquiryIdFromReference);
+        const lookupConditions = [
+            ...(checkoutId
+                ? [{ "payment.checkoutId": checkoutId }, { "payment.invoiceId": checkoutId }]
+                : []),
+            ...(clientReferenceId
+                ? [{ "payment.clientReferenceId": clientReferenceId }]
+                : []),
+            ...(canQueryInquiryId ? [{ _id: inquiryIdFromReference }] : []),
+        ];
+
+        if (lookupConditions.length === 0) {
+            return res.json({ received: true, matched: false });
+        }
+
+        const inquiry = await Inquiry.findOne({
+            $or: lookupConditions,
+        })
+            .populate(
+                "listing",
+                "title owner location monthlyRent deposit leaseTemplateName leaseTemplateUrl leaseTemplateContent"
+            )
+            .populate("renter", "name email");
+
+        if (!inquiry) {
+            return res.json({ received: true, matched: false });
+        }
+
+        inquiry.payment = {
+            ...(inquiry.payment?.toObject?.() || inquiry.payment || {}),
+            provider: "byl",
+            status: "paid",
+            amount: Number(checkout?.amount_total || inquiry.payment?.amount || 0),
+            invoiceId: checkoutId || inquiry.payment?.invoiceId || "",
+            checkoutId: checkoutId || inquiry.payment?.checkoutId || "",
+            checkoutUrl: String(checkout?.url || inquiry.payment?.checkoutUrl || ""),
+            clientReferenceId,
+            paidAt: checkout?.updated_at ? new Date(checkout.updated_at) : new Date(),
+            lastCheckedAt: new Date(),
+        };
+
+        await inquiry.save();
+        await finalizeInquiryAgreementIfReady({
+            inquiry,
+            req: buildRequestContext(req),
+        });
+
+        res.json({ received: true, matched: true });
+    } catch (err) {
+        console.error("Failed to handle Byl webhook", err);
         res.status(getPaymentErrorStatus(err)).json({ message: err.message });
     }
 };

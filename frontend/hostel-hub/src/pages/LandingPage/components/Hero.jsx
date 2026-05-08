@@ -2,18 +2,20 @@ import { motion as Motion } from "framer-motion";
 import {Search, ArrowRight, Users, Building2, TrendingUp} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { usePreferences } from '../../../context/PreferencesContext';
 import { ROUTES } from "../../../utils/routePaths";
 
 const Hero = () => {
     const {user, isAuthenticated} = useAuth();
+    const { language } = usePreferences();
     const navigate = useNavigate();
     const stats =[
-        {icon: Users, label: 'Monthly Inquiries', value: '4.8K+'},
-        {icon: Building2, label: 'Listed Hostels', value: '320+'},
-        {icon: TrendingUp, label: 'Available Beds', value: '1.2K+'},
+        {icon: Users, label: language === "en" ? "Monthly inquiries" : "Сарын хүсэлт", value: '4.8K+'},
+        {icon: Building2, label: language === "en" ? "Total hostels" : "Нийт хостел", value: '320+'},
+        {icon: TrendingUp, label: language === "en" ? "Available beds" : "Сул ор", value: '1.2K+'},
     ];
   return (
-    <section className="pt-24 pb-16 bg-white min-h-screen flex items-center">
+    <section className="pt-24 pb-16 bg-white min-h-screen flex items-center dark:bg-gray-950">
         <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
                 {/*main heading */}
@@ -21,10 +23,10 @@ const Hero = () => {
                     initial={{opacity:0, y:30}}
                     animate={{opacity:1, y:0}}
                     transition={{duration:0.8}}
-                    className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight placeholder-teal-10">
-                        Find the right
+                    className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight placeholder-teal-10 dark:text-white">
+                        {language === "en" ? "Find the city hostel" : "Танд тохирох"}
                         <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mt-2">
-                            hostel in the city
+                            {language === "en" ? "that fits you" : "хотын хостелийг олоорой"}
                         </span>
                 </Motion.h1>
                 {/*subheading*/}
@@ -32,9 +34,11 @@ const Hero = () => {
                     initial={{opacity:0, y:30}}
                     animate={{opacity:1, y:0}}
                     transition={{delay:0.2, duration:0.8}}
-                    className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed"
+                    className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed dark:text-gray-300"
                 >
-                    Compare daily rent, deposit, available beds, amenities, and house rules in one place, then send an inquiry directly to the owner.
+                    {language === "en"
+                        ? "Compare daily rent, deposit, available beds, amenities, and rules in one place, then send an inquiry directly to the owner."
+                        : "Өдрийн түрээс, барьцаа, сул ор, тохижилт, дүрмийг нэг дор харьцуулаад эзэмшигч рүү шууд хүсэлт илгээнэ."}
                 </Motion.p>
                 {/*CTA button*/}
                 <Motion.div
@@ -51,20 +55,20 @@ const Hero = () => {
                     >
                         <Search className="w-5 h-5"/>
                         <span>
-                            Browse Hostels
+                            {language === "en" ? "Find hostels" : "Хостел хайх"}
                         </span>
                         <ArrowRight className="w-5 h-5 group-hover:transition-transform "/>
                     </Motion.button>
                     <Motion.button
                         whileHover={{scale:1.02}}
                         whileTap={{scale:0.98}}
-                        className="bg-white border-2 border-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md"
+                        className="bg-white border-2 border-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-800"
                         onClick={() => {navigate(isAuthenticated && user?.role==="owner"
                             ?ROUTES.OWNER_DASHBOARD
                             :ROUTES.LOGIN);
                         }}
                     >
-                        Post a Listing
+                        {language === "en" ? "Post listing" : "Зар оруулах"}
                     </Motion.button>
                 </Motion.div>
                 {/*stats*/}
@@ -80,12 +84,12 @@ const Hero = () => {
                             initial= {{opacity:0, y:20}}
                             animate={{opacity:1, y:0}}
                             transition={{delay:0.8 + index *0.1, duration: 0.6}}
-                            className="flex flex-col items-center space-y-2 p-4 rounded-xl hover:bg-gray-50 transition-colors">
+                            className="flex flex-col items-center space-y-2 p-4 rounded-xl hover:bg-gray-50 transition-colors dark:hover:bg-gray-900">
                                 <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl flex items-center justify-center mb-2">
                                     <stat.icon className="w-6 h-6 text-blue-600"/>
                                 </div>
-                                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                                <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
+                                <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                                <div className="text-sm text-gray-600 font-medium dark:text-gray-300">{stat.label}</div>
                         </Motion.div>
                     ))}
                 </Motion.div>

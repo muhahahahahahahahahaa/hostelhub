@@ -1,6 +1,9 @@
 import { Clock } from "lucide-react";
+import { usePreferences } from "../../context/PreferencesContext";
 
 const InquiryDashboardCard = ({ renter, listingTitle, time, onClick }) => {
+  const { t } = usePreferences();
+
   if (!renter) return null;
 
   return (
@@ -23,7 +26,7 @@ const InquiryDashboardCard = ({ renter, listingTitle, time, onClick }) => {
                     {renter.name}
                 </h4>
                 <p className="text-sm text-gray-500">
-                    Inquiry for {listingTitle}
+                    {listingTitle} {t("listingInquiry")}
                 </p>
             </div>
         </div>

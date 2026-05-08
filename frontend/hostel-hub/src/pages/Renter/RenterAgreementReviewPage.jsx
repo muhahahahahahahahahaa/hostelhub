@@ -17,11 +17,11 @@ const FALLBACK_SECTIONS = [
 ];
 
 const STEPS = [
-  "Review Clauses",
-  "Renter Info",
-  "Signature",
-  "Complete",
-  "Payment",
+  "Заалтууд хянах",
+  "Түрээслэгчийн мэдээлэл",
+  "Гарын үсэг",
+  "Дуусгах",
+  "Төлбөр",
 ];
 
 const parseTemplateContentToSections = (content = "") => {
@@ -114,7 +114,7 @@ const RenterAgreementReviewPage = () => {
         setPayment(response.data?.payment || null);
       } catch (error) {
         console.error("Failed to load inquiry agreement review", error);
-        toast.error(error?.response?.data?.message || "Failed to load agreement review.");
+        toast.error(error?.response?.data?.message || "Гэрээний хяналтыг ачаалж чадсангүй.");
         if (isMounted) {
           setInquiry(null);
         }
@@ -146,7 +146,9 @@ const RenterAgreementReviewPage = () => {
     let intervalId;
 
     const pollPayment = async () => {
-      if (!inquiryId || currentStep !== 4 || !payment?.invoiceId || payment?.status !== "pending") {
+      const paymentId = payment?.checkoutId || payment?.invoiceId;
+
+      if (!inquiryId || currentStep !== 4 || !paymentId || payment?.status !== "pending") {
         return;
       }
 
@@ -156,10 +158,10 @@ const RenterAgreementReviewPage = () => {
         setPayment(nextPayment);
 
         if (nextPayment?.status === "paid") {
-          toast.success("Payment completed successfully.");
+          toast.success("Төлбөр амжилттай төлөгдлөө.");
           navigate(ROUTES.RENTER_PROFILE);
         } else if (nextPayment?.status === "expired") {
-          toast.error("Payment deadline expired. Booking was cancelled.");
+          toast.error("Төлбөр төлөх хугацаа дууссан тул захиалга цуцлагдлаа.");
           navigate(ROUTES.RENTER_PROFILE);
         }
       } catch (error) {
@@ -176,7 +178,13 @@ const RenterAgreementReviewPage = () => {
         window.clearInterval(intervalId);
       }
     };
-  }, [currentStep, inquiryId, navigate, payment?.invoiceId, payment?.status]);
+  }, [currentStep, inquiryId, navigate, payment?.checkoutId, payment?.invoiceId, payment?.status]);
+
+  useEffect(() => {
+    if (payment?.status === "pending" || payment?.status === "paid") {
+      setCurrentStep(4);
+    }
+  }, [payment?.status]);
 
   useEffect(() => {
     if (currentStep !== 2 || !canvasRef.current) {
@@ -280,7 +288,7 @@ const RenterAgreementReviewPage = () => {
 
   const handleViewPdf = async () => {
     if (!inquiryId) {
-      toast.error("Template preview is not available.");
+      toast.error("Загварын урьдчилсан харагдац боломжгүй байна.");
       return;
     }
 
@@ -296,14 +304,14 @@ const RenterAgreementReviewPage = () => {
       const previewUrl = response.data?.previewUrl;
 
       if (!previewUrl) {
-        toast.error("Failed to prepare PDF preview.");
+        toast.error("PDF урьдчилсан харагдац бэлтгэж чадсангүй.");
         return;
       }
 
       window.open(previewUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       console.error("Failed to open agreement pdf", error);
-      toast.error(error?.response?.data?.message || "Failed to open PDF preview.");
+      toast.error(error?.response?.data?.message || "PDF урьдчилсан харагдац нээж чадсангүй.");
     } finally {
       setDownloading(false);
     }
@@ -311,17 +319,17 @@ const RenterAgreementReviewPage = () => {
 
   const handleStepNext = async () => {
     if (currentStep === 0 && !accepted) {
-      toast.error("Please confirm the checkbox before continuing.");
+      toast.error("Үргэлжлүүлэхийн өмнө зөвшөөрөх тэмдэглэгээг хийнэ үү.");
       return;
     }
 
     if (currentStep === 1 && (!renterName.trim() || !phoneNumber.trim())) {
-      toast.error("Please enter your full name and phone number.");
+      toast.error("Овог нэр болон утасны дугаараа оруулна уу.");
       return;
     }
 
     if (currentStep === 2 && !hasSignature) {
-      toast.error("Please add your signature before continuing.");
+      toast.error("Үргэлжлүүлэхийн өмнө гарын үсгээ зурна уу.");
       return;
     }
 
@@ -350,12 +358,17 @@ const RenterAgreementReviewPage = () => {
       });
 
       const response = await axiosInstance.post(API_PATHS.INQUIRIES.PAYMENT_INITIATE(inquiryId));
-      setPayment(response.data?.payment || null);
+      const nextPayment = response.data?.payment || null;
+      setPayment(nextPayment);
       setCurrentStep(4);
-      toast.success("Payment invoice created.");
+      toast.success("Төлбөрийн нэхэмжлэл үүслээ.");
+
+      if (nextPayment?.checkoutUrl) {
+        window.location.href = nextPayment.checkoutUrl;
+      }
     } catch (error) {
       console.error("Failed to prepare payment", error);
-      toast.error(error?.response?.data?.message || "Failed to prepare payment.");
+      toast.error(error?.response?.data?.message || "Төлбөр бэлтгэж чадсангүй.");
     } finally {
       setCreatingPayment(false);
     }
@@ -369,21 +382,21 @@ const RenterAgreementReviewPage = () => {
       setPayment(nextPayment);
 
       if (nextPayment?.status === "paid") {
-        toast.success("Payment completed successfully.");
+        toast.success("Төлбөр амжилттай төлөгдлөө.");
         navigate(ROUTES.RENTER_PROFILE);
         return;
       }
 
       if (nextPayment?.status === "expired") {
-        toast.error("Payment deadline expired. Booking was cancelled.");
+        toast.error("Төлбөр төлөх хугацаа дууссан тул захиалга цуцлагдлаа.");
         navigate(ROUTES.RENTER_PROFILE);
         return;
       }
 
-      toast("Payment not confirmed yet. Please complete the QPay transfer and check again.");
+      toast("Төлбөр хараахан баталгаажаагүй байна. Төлбөрөө төлөөд дахин шалгана уу.");
     } catch (error) {
       console.error("Failed to check payment", error);
-      toast.error(error?.response?.data?.message || "Failed to check payment status.");
+      toast.error(error?.response?.data?.message || "Төлбөрийн төлөв шалгаж чадсангүй.");
     } finally {
       setCheckingPayment(false);
     }
@@ -418,7 +431,7 @@ const RenterAgreementReviewPage = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-4 text-sm text-slate-500">No clauses added in this section.</p>
+                  <p className="mt-4 text-sm text-slate-500">Энэ хэсэгт заалт нэмээгүй байна.</p>
                 )}
               </div>
             ))}
@@ -433,7 +446,7 @@ const RenterAgreementReviewPage = () => {
                 className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
               />
               <span>
-                I have reviewed the lease agreement clauses and I understand the terms shown above.
+                Би түрээсийн гэрээний заалтуудыг уншиж танилцсан бөгөөд дээрх нөхцөлийг ойлгож байна.
               </span>
             </label>
 
@@ -443,7 +456,7 @@ const RenterAgreementReviewPage = () => {
                 onClick={handleStepNext}
                 className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
               >
-                Next
+                Дараах
               </button>
             </div>
           </div>
@@ -494,14 +507,14 @@ const RenterAgreementReviewPage = () => {
               onClick={handleStepBack}
               className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Back
+              Буцах
             </button>
             <button
               type="button"
               onClick={handleStepNext}
               className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
             >
-              Next
+              Дараах
             </button>
           </div>
         </div>
@@ -514,9 +527,9 @@ const RenterAgreementReviewPage = () => {
           <div className="mx-auto max-w-3xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">Draw your signature</h2>
+                <h2 className="text-xl font-semibold text-slate-900">Гарын үсгээ зурна уу</h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  Sign inside the blank area below.
+                  Доорх хоосон талбайд гарын үсгээ зурна уу.
                 </p>
               </div>
 
@@ -526,7 +539,7 @@ const RenterAgreementReviewPage = () => {
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 <RotateCcw className="h-4 w-4" />
-                Clear
+                Арилгах
               </button>
             </div>
 
@@ -540,7 +553,7 @@ const RenterAgreementReviewPage = () => {
                 onTouchStart={startDrawing}
                 onTouchMove={draw}
                 onTouchEnd={stopDrawing}
-                className="h-[420px] w-full rounded-[20px] bg-white"
+                className="signature-canvas h-[420px] w-full rounded-[20px] border border-slate-200"
               />
             </div>
           </div>
@@ -551,14 +564,14 @@ const RenterAgreementReviewPage = () => {
               onClick={handleStepBack}
               className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Back
+              Буцах
             </button>
             <button
               type="button"
               onClick={handleStepNext}
               className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
             >
-              Next
+              Дараах
             </button>
           </div>
         </div>
@@ -569,9 +582,9 @@ const RenterAgreementReviewPage = () => {
       return (
         <div className="px-6 py-8">
           <div className="mx-auto max-w-3xl rounded-[28px] border border-slate-200 bg-slate-50 p-8 text-center shadow-sm">
-            <h2 className="text-2xl font-semibold text-slate-900">Agreement steps completed</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">Гэрээний алхмууд дууслаа</h2>
             <p className="mt-3 text-sm leading-7 text-slate-500">
-              Your renter information and signature are ready. Continue to payment and complete it within 24 hours.
+              Таны мэдээлэл болон гарын үсэг бэлэн боллоо. Төлбөр рүү үргэлжлээд 24 цагийн дотор төлнө үү.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -580,7 +593,7 @@ const RenterAgreementReviewPage = () => {
                 onClick={handleStepBack}
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
-                Back
+                Буцах
               </button>
               <button
                 type="button"
@@ -589,7 +602,7 @@ const RenterAgreementReviewPage = () => {
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <FileText className="h-4 w-4" />
-                Next Template
+                Гэрээ харах
               </button>
 
               <button
@@ -598,7 +611,7 @@ const RenterAgreementReviewPage = () => {
                 disabled={creatingPayment}
                 className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
-                {creatingPayment ? "Preparing..." : "Next"}
+                {creatingPayment ? "Бэлтгэж байна..." : "Дараах"}
               </button>
             </div>
           </div>
@@ -611,40 +624,50 @@ const RenterAgreementReviewPage = () => {
         <div className="mx-auto max-w-3xl rounded-[28px] border border-slate-200 bg-slate-50 p-8 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-900">QPay payment</h2>
+              <h2 className="text-2xl font-semibold text-slate-900">
+                {payment?.provider === "qpay" ? "QPay төлбөр" : "Byl төлбөр"}
+              </h2>
               <p className="mt-3 text-sm leading-7 text-slate-500">
-                Pay within 24 hours. After successful payment, the signed PDF agreement will be sent to both owner and renter.
+                24 цагийн дотор төлнө үү. Төлбөр амжилттай бол гарын үсэгтэй PDF гэрээ эзэмшигч болон түрээслэгчид илгээгдэнэ.
               </p>
             </div>
             {payment?.status === "paid" ? (
               <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
                 <CheckCircle2 className="h-4 w-4" />
-                Paid
+                Төлөгдсөн
               </span>
             ) : null}
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
             <div className="rounded-3xl border border-slate-200 bg-white p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Amount</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Дүн</p>
               <p className="mt-3 text-3xl font-bold text-slate-900">
                 {Number(payment?.amount || 0).toLocaleString()} MNT
               </p>
               <p className="mt-4 text-sm text-slate-500">
-                Due: {payment?.dueAt ? new Date(payment.dueAt).toLocaleString() : "24 hours from invoice creation"}
+                Төлөх хугацаа: {payment?.dueAt ? new Date(payment.dueAt).toLocaleString() : "Нэхэмжлэл үүссэнээс 24 цаг"}
               </p>
             </div>
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5">
-              {payment?.qrImage ? (
+              {payment?.checkoutUrl ? (
+                <a
+                  href={payment.checkoutUrl}
+                  className="flex h-56 flex-col items-center justify-center gap-3 rounded-2xl border border-blue-100 bg-blue-50 text-center text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                >
+                  <ExternalLink className="h-8 w-8" />
+                  Byl төлбөр нээх
+                </a>
+              ) : payment?.qrImage ? (
                 <img
                   src={payment.qrImage}
-                  alt="QPay QR"
+                  alt="QPay QR код"
                   className="mx-auto h-56 w-56 rounded-2xl border border-slate-200 object-contain p-3"
                 />
               ) : (
                 <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-400">
-                  QR will appear here
+                  QR энд харагдана
                 </div>
               )}
 
@@ -658,7 +681,7 @@ const RenterAgreementReviewPage = () => {
                       rel="noreferrer"
                       className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
                     >
-                      {entry.name || entry.description || "Open payment app"}
+                      {entry.name || entry.description || "Төлбөрийн апп нээх"}
                     </a>
                   ))}
                 </div>
@@ -672,7 +695,7 @@ const RenterAgreementReviewPage = () => {
               onClick={handleStepBack}
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Back
+              Буцах
             </button>
             <button
               type="button"
@@ -680,7 +703,7 @@ const RenterAgreementReviewPage = () => {
               disabled={checkingPayment || payment?.status === "paid"}
               className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
-              {checkingPayment ? "Checking..." : "Check payment"}
+              {checkingPayment ? "Шалгаж байна..." : "Төлбөр шалгах"}
             </button>
           </div>
         </div>
@@ -695,7 +718,7 @@ const RenterAgreementReviewPage = () => {
         <div className="flex min-h-screen items-center justify-center pt-16">
           <div className="text-center">
             <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
-            <p className="mt-3 text-sm text-slate-500">Loading agreement...</p>
+            <p className="mt-3 text-sm text-slate-500">Гэрээ ачаалж байна...</p>
           </div>
         </div>
       </div>
@@ -708,16 +731,16 @@ const RenterAgreementReviewPage = () => {
         <Navbar />
         <div className="mx-auto max-w-3xl px-4 pb-10 pt-24">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <h1 className="text-2xl font-semibold text-slate-900">Agreement is not available</h1>
+            <h1 className="text-2xl font-semibold text-slate-900">Гэрээ одоогоор боломжгүй байна</h1>
             <p className="mt-3 text-sm text-slate-500">
-              This agreement can be reviewed after the owner confirms your request.
+              Эзэмшигч таны хүсэлтийг баталгаажуулсны дараа энэ гэрээг хянах боломжтой.
             </p>
             <Link
               to={ROUTES.RENTER_PROFILE}
               className="mt-6 inline-flex items-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to profile
+              Профайл руу буцах
             </Link>
           </div>
         </div>
@@ -738,14 +761,14 @@ const RenterAgreementReviewPage = () => {
                 className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back to notifications
+                Мэдэгдэл рүү буцах
               </Link>
               <h1 className="mt-4 text-3xl font-semibold text-slate-900">
-                Lease Agreement Review
+                Түрээсийн гэрээ хянах
               </h1>
               <p className="mt-2 text-sm text-slate-500">
-                {inquiry?.listing?.title || "Listing"} •{" "}
-                {inquiry?.listing?.leaseTemplateName || "Template"}
+                {inquiry?.listing?.title || "Зар"} •{" "}
+                {inquiry?.listing?.leaseTemplateName || "Загвар"}
               </p>
             </div>
 
@@ -756,7 +779,7 @@ const RenterAgreementReviewPage = () => {
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <FileText className="h-4 w-4" />
-              <span>View as PDF</span>
+              <span>PDF-ээр харах</span>
               <ExternalLink className="h-4 w-4" />
             </button>
           </div>

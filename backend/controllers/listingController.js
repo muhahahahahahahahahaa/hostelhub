@@ -7,7 +7,20 @@ const Inquiry = require("../models/Inquiry");
 const SavedListing = require("../models/SavedListing");
 const Chat = require("../models/Chat");
 const User = require("../models/User");
+const Review = require("../models/Review");
 const { getOwnerLeaseTemplates } = require("../utils/leaseTemplates");
+const { convertToPdf } = require("../utils/libreOffice");
+const {
+    attachReviewSummary,
+    buildReviewStatsMap,
+    getReviewEligibility,
+} = require("../utils/reviewStats");
+const {
+    attachExpiryState,
+    autoCloseExpiredListings,
+    getActiveAvailabilityQuery,
+    isListingExpired,
+} = require("../utils/listingExpiry");
 const execFileAsync = promisify(execFile);
 const TEMPLATE_PREVIEW_DIR = path.join(__dirname, "..", "uploads", "template-previews");
 
@@ -67,7 +80,7 @@ const buildTemplatePreviewUrl = (req, filename) =>
     `${req.protocol}://${req.get("host")}/uploads/template-previews/${filename}`;
 
 const attachDailyRent = (listing = {}) => ({
-    ...listing,
+    ...attachExpiryState(listing),
     dailyRent: listing.dailyRent ?? listing.monthlyRent ?? null,
 });
 
@@ -410,7 +423,7 @@ exports.getListings = async (req, res) => {
     const currentRenterId = renterId || userId;
 
     const query = { isClosed: false };
-    const andConditions = [];
+    const andConditions = [getActiveAvailabilityQuery()];
 
     if (keyword) {
         query.$or = [
@@ -476,11 +489,13 @@ exports.getListings = async (req, res) => {
     }
 
     try {
+        await autoCloseExpiredListings();
         const listings = await Listing.find(query).populate(
             "owner",
             "name hostelName hostelLogo"
         );
 
+        const reviewStatsMap = await buildReviewStatsMap(listings.map((listing) => listing._id));
         let savedListingIds = [];
         let inquiryStatusMap = {};
 
@@ -501,7 +516,7 @@ exports.getListings = async (req, res) => {
         const listingsWithExtras = listings.map((listing) => {
             const listingId = String(listing._id);
             return attachDailyRent({
-                ...listing.toObject(),
+                ...attachReviewSummary(listing, reviewStatsMap),
                 isSaved: savedListingIds.includes(listingId),
                 inquiryStatus: inquiryStatusMap[listingId] || null,
             });
@@ -521,9 +536,11 @@ exports.getOwnerListings = async (req, res) => {
             return res.status(403).json({ message: "Access denied" });
         }
 
+        await autoCloseExpiredListings(userId);
         const listings = await Listing.find({ owner: userId })
             .populate("owner", "name hostelName hostelLogo")
             .lean();
+        const reviewStatsMap = await buildReviewStatsMap(listings.map((listing) => listing._id));
 
         const listingsWithInquiryCounts = await Promise.all(
             listings.map(async (listing) => {
@@ -531,7 +548,7 @@ exports.getOwnerListings = async (req, res) => {
                     listing: listing._id,
                 });
                 return {
-                    ...listing,
+                    ...attachReviewSummary(listing, reviewStatsMap),
                     dailyRent: listing.monthlyRent ?? null,
                     inquiryCount,
                 };
@@ -547,6 +564,7 @@ exports.getOwnerListings = async (req, res) => {
 exports.getListingById = async (req, res) => {
     try {
         const currentRenterId = req.query.renterId || req.query.userId;
+        await autoCloseExpiredListings();
         const listing = await Listing.findById(req.params.id).populate(
             "owner",
             "name hostelName hostelLogo"
@@ -556,7 +574,13 @@ exports.getListingById = async (req, res) => {
             return res.status(404).json({ message: "Listing not found" });
         }
 
+        if (isListingExpired(listing) && !listing.isClosed) {
+            listing.isClosed = true;
+            await listing.save();
+        }
+
         let inquiryStatus = null;
+        let reviewEligibility = null;
 
         if (currentRenterId) {
             const inquiry = await Inquiry.findOne({
@@ -567,11 +591,26 @@ exports.getListingById = async (req, res) => {
             if (inquiry) {
                 inquiryStatus = inquiry.status;
             }
+
+            reviewEligibility = await getReviewEligibility({
+                listingId: listing._id,
+                renterId: currentRenterId,
+            });
         }
 
+        const [reviewStatsMap, reviews] = await Promise.all([
+            buildReviewStatsMap([listing._id]),
+            Review.find({ listing: listing._id })
+                .sort({ createdAt: -1 })
+                .populate("renter", "name avatar")
+                .populate("inquiry", "requestedFrom requestedTo"),
+        ]);
+
         res.json(attachDailyRent({
-            ...listing.toObject(),
+            ...attachReviewSummary(listing, reviewStatsMap),
             inquiryStatus,
+            reviewEligibility,
+            reviews,
         }));
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -626,14 +665,10 @@ exports.getListingTemplatePreview = async (req, res) => {
             const shouldRegenerate = !previewStat || sourceStat.mtimeMs > previewStat.mtimeMs;
 
             if (shouldRegenerate) {
-                await execFileAsync("libreoffice", [
-                    "--headless",
-                    "--convert-to",
-                    "pdf",
-                    "--outdir",
-                    TEMPLATE_PREVIEW_DIR,
+                await convertToPdf({
                     sourcePath,
-                ]);
+                    outputDir: TEMPLATE_PREVIEW_DIR,
+                });
 
                 const generatedPreviewPath = path.join(
                     TEMPLATE_PREVIEW_DIR,
@@ -656,14 +691,10 @@ exports.getListingTemplatePreview = async (req, res) => {
         });
 
         try {
-            await execFileAsync("libreoffice", [
-                "--headless",
-                "--convert-to",
-                "pdf",
-                "--outdir",
-                TEMPLATE_PREVIEW_DIR,
-                generatedDocxPath,
-            ]);
+            await convertToPdf({
+                sourcePath: generatedDocxPath,
+                outputDir: TEMPLATE_PREVIEW_DIR,
+            });
 
             return res.json({
                 previewUrl: buildTemplatePreviewUrl(req, path.basename(generatedPdfPath)),
@@ -715,6 +746,7 @@ exports.deleteListing = async (req, res) => {
         await Inquiry.deleteMany({ listing: listing._id });
         await SavedListing.deleteMany({ listing: listing._id });
         await Chat.deleteMany({ listing: listing._id });
+        await Review.deleteMany({ listing: listing._id });
         await listing.deleteOne();
 
         res.json({ message: "Listing deleted successfully" });
@@ -735,6 +767,12 @@ exports.toggleListingStatus = async (req, res) => {
             return res
                 .status(403)
                 .json({ message: "Not authorized to update this listing" });
+        }
+
+        if (listing.isClosed && isListingExpired(listing)) {
+            return res.status(400).json({
+                message: "Cannot reopen expired listing. Update availability first.",
+            });
         }
 
         listing.isClosed = !listing.isClosed;

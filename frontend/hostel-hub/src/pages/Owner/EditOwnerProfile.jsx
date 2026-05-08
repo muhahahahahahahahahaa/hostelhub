@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { getInitials } from "../../utils/helper";
 import { ROUTES } from "../../utils/routePaths";
+import { usePreferences } from "../../context/PreferencesContext";
 
 
 const EditOwnerProfile = ({
@@ -15,6 +16,8 @@ const EditOwnerProfile = ({
   saving,
   uploading,
 }) => {
+  const { t } = usePreferences();
+
   return (
     <DashboardLayout activeMenu='owner-profile'>
       {formData && 
@@ -23,7 +26,7 @@ const EditOwnerProfile = ({
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               {/*header */}
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6">
-                <h1 className="text-lg md:text-xl font-medium text-white">Edit Owner Profile</h1>
+                <h1 className="text-lg md:text-xl font-medium text-white">{t("editOwnerProfile")}</h1>
               </div>
               
               {/*edit form */}
@@ -32,7 +35,7 @@ const EditOwnerProfile = ({
                   {/*personal information */}
                   <div className="space-y-6">
                     <h2 className="text-lg font-medium text-gray-800 border-b pb-2">
-                      Personal Information
+                      {t("personalInfo")}
                     </h2>
 
                     {/*Avatar Upload */}
@@ -41,13 +44,13 @@ const EditOwnerProfile = ({
                         {formData?.avatar ? (
                           <img
                             src={formData?.avatar}
-                            alt="Avatar"
+                            alt={t("profileImage")}
                             className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
                           />
                         ) : (
                           <div className="w-20 h-20 rounded-full border-4 border-gray-200 bg-blue-100 flex items-center justify-center">
                             <span className="text-lg font-semibold text-blue-700">
-                              {getInitials(formData?.name || "Owner")}
+                              {getInitials(formData?.name || t("ownerFallback"))}
                             </span>
                           </div>
                         )}
@@ -59,7 +62,7 @@ const EditOwnerProfile = ({
                       </div>
                       <div>
                         <label className="block">
-                          <span className="sr-only">Choose avatar</span>
+                          <span className="sr-only">{t("profileImage")}</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -73,7 +76,7 @@ const EditOwnerProfile = ({
                     {/*name input */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Full Name
+                        {t("fullName")}
                       </label>
                       <input
                         type="text"
@@ -82,14 +85,14 @@ const EditOwnerProfile = ({
                           handleInputChange("name", e.target.value)
                         }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        placeholder="Enter your full name"
+                        placeholder={t("fullName")}
                       />
                     </div>
 
                     {/*email (read-only) */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address
+                        {t("emailAddress")}
                       </label>
                       <input
                         type="email"
@@ -101,7 +104,7 @@ const EditOwnerProfile = ({
 
                     <details className="rounded-xl border border-gray-200 bg-white">
                       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium text-gray-700">
-                        <span>Saved Templates</span>
+                        <span>{t("savedTemplates")}</span>
                         <ChevronDown className="h-4 w-4 text-gray-500" />
                       </summary>
                       <div className="border-t border-gray-200 px-4 py-4">
@@ -122,7 +125,7 @@ const EditOwnerProfile = ({
                                     to={ROUTES.OWNER_TEMPLATE_CLAUSES(encodeURIComponent(template.name))}
                                     className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-white transition-colors"
                                   >
-                                    Edit Template
+                                    {t("editTemplate")}
                                   </Link>
                                   <button
                                     type="button"
@@ -143,7 +146,7 @@ const EditOwnerProfile = ({
                           </div>
                         ) : (
                           <p className="text-sm text-gray-500">
-                            No templates added yet.
+                            {t("noTemplatesYet")}
                           </p>
                         )}
                       </div>
@@ -153,7 +156,7 @@ const EditOwnerProfile = ({
                   {/*company information */}
                   <div className="space-y-6">
                     <h2 className="text-lg font-medium text-gray-800 border-b pb-2">
-                      Hostel Information
+                      {t("hostelInfo")}
                     </h2>
 
                     {/*hostel logo upload */}
@@ -162,12 +165,12 @@ const EditOwnerProfile = ({
                         {formData.hostelLogo ? (
                           <img
                             src={formData.hostelLogo}
-                            alt="Hostel Logo"
+                            alt={t("hostelLogo")}
                             className="w-20 h-20 rounded-lg object-cover border-4 border-gray-200"
                           />
                         ) : (
                           <div className="w-20 h-20 rounded-lg border-4 border-gray-200 bg-blue-100 flex items-center justify-center">
-                            <span className="text-sm font-semibold text-blue-700">Hostel</span>
+                            <span className="text-sm font-semibold text-blue-700">{t("listing")}</span>
                           </div>
                         )}
                         {uploading.logo && (
@@ -178,7 +181,7 @@ const EditOwnerProfile = ({
                       </div>
                       <div>
                         <label className="block">
-                          <span className="sr-only">Choose hostel logo</span>
+                          <span className="sr-only">{t("hostelLogo")}</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -192,7 +195,7 @@ const EditOwnerProfile = ({
                     {/*hostel name */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Hostel Name
+                        {t("hostelName")}
                       </label>
                       <input
                         type="text"
@@ -201,14 +204,14 @@ const EditOwnerProfile = ({
                           handleInputChange("hostelName", e.target.value)
                         }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        placeholder="Enter hostel name"
+                        placeholder={t("hostelName")}
                       />
                     </div>
 
                     {/*hostel description */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Hostel Description
+                        {t("hostelDescription")}
                       </label>
                       <textarea
                         value={formData.hostelDescription}
@@ -220,7 +223,7 @@ const EditOwnerProfile = ({
                         }
                         rows={4}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                        placeholder="Describe your hostel..."
+                        placeholder={t("hostelDescription")}
                       />
                     </div>
 
@@ -228,7 +231,7 @@ const EditOwnerProfile = ({
                       to={ROUTES.OWNER_TEMPLATE_NEW}
                       className="inline-flex w-fit rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
                     >
-                      Add New Template
+                      {t("addNewTemplate")}
                     </Link>
 
                   </div>
@@ -241,7 +244,7 @@ const EditOwnerProfile = ({
                     className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
                   >
                     <X className="w-4 h-4" />
-                    <span>Cancel</span>
+                    <span>{t("cancel")}</span>
                   </button>
                   <button
                     onClick={handleSave}
@@ -253,7 +256,7 @@ const EditOwnerProfile = ({
                     ) : (
                       <Save className="w-4 h-4" />
                     )}
-                    <span>{saving ? "Saving..." : "Save Changes"}</span>
+                    <span>{saving ? t("saving") : t("saveChanges")}</span>
                   </button>
                 </div>
               </div>

@@ -17,10 +17,10 @@ const FALLBACK_SECTIONS = [
 ];
 
 const STEPS = [
-  "Review Clauses",
-  "Owner Info",
-  "Signature",
-  "Complete",
+  "Заалтууд хянах",
+  "Эзэмшигчийн мэдээлэл",
+  "Гарын үсэг",
+  "Дуусгах",
 ];
 
 const parseTemplateContentToSections = (content = "") => {
@@ -110,7 +110,7 @@ const OwnerAgreementConfirmPage = () => {
         setInquiry(response.data || null);
       } catch (error) {
         console.error("Failed to load owner inquiry confirmation", error);
-        toast.error(error?.response?.data?.message || "Failed to load agreement confirmation.");
+        toast.error(error?.response?.data?.message || "Гэрээ баталгаажуулах мэдээлэл ачаалж чадсангүй.");
         if (isMounted) {
           setInquiry(null);
         }
@@ -240,7 +240,7 @@ const OwnerAgreementConfirmPage = () => {
 
   const handleViewPdf = async () => {
     if (!inquiryId) {
-      toast.error("Template preview is not available.");
+      toast.error("Загварын урьдчилсан харагдац боломжгүй байна.");
       return;
     }
 
@@ -256,14 +256,14 @@ const OwnerAgreementConfirmPage = () => {
       const previewUrl = response.data?.previewUrl;
 
       if (!previewUrl) {
-        toast.error("Failed to prepare PDF preview.");
+        toast.error("PDF урьдчилсан харагдац бэлтгэж чадсангүй.");
         return;
       }
 
       window.open(previewUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       console.error("Failed to open agreement pdf", error);
-      toast.error(error?.response?.data?.message || "Failed to open PDF preview.");
+      toast.error(error?.response?.data?.message || "PDF урьдчилсан харагдац нээж чадсангүй.");
     } finally {
       setDownloading(false);
     }
@@ -271,17 +271,17 @@ const OwnerAgreementConfirmPage = () => {
 
   const handleStepNext = () => {
     if (currentStep === 0 && !accepted) {
-      toast.error("Please confirm the checkbox before continuing.");
+      toast.error("Үргэлжлүүлэхийн өмнө зөвшөөрөх тэмдэглэгээг хийнэ үү.");
       return;
     }
 
     if (currentStep === 1 && (!ownerName.trim() || !phoneNumber.trim())) {
-      toast.error("Please enter your full name and phone number.");
+      toast.error("Овог нэр болон утасны дугаараа оруулна уу.");
       return;
     }
 
     if (currentStep === 2 && !hasSignature) {
-      toast.error("Please add your signature before continuing.");
+      toast.error("Үргэлжлүүлэхийн өмнө гарын үсгээ зурна уу.");
       return;
     }
 
@@ -308,11 +308,11 @@ const OwnerAgreementConfirmPage = () => {
         phoneNumber,
         signatureDataUrl: getSignatureDataUrl(),
       });
-      toast.success("Inquiry confirmed successfully.");
+      toast.success("Хүсэлт амжилттай баталгаажлаа.");
       navigate(ROUTES.INQUIRIES);
     } catch (error) {
       console.error("Failed to confirm inquiry with agreement", error);
-      toast.error(error?.response?.data?.message || "Failed to confirm inquiry.");
+      toast.error(error?.response?.data?.message || "Хүсэлт баталгаажуулж чадсангүй.");
     } finally {
       setSubmitting(false);
     }
@@ -347,7 +347,7 @@ const OwnerAgreementConfirmPage = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-4 text-sm text-slate-500">No clauses added in this section.</p>
+                  <p className="mt-4 text-sm text-slate-500">Энэ хэсэгт заалт нэмээгүй байна.</p>
                 )}
               </div>
             ))}
@@ -362,7 +362,7 @@ const OwnerAgreementConfirmPage = () => {
                 className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
               />
               <span>
-                I have reviewed the lease agreement clauses and I understand the terms shown above.
+                Би түрээсийн гэрээний заалтуудыг уншиж танилцсан бөгөөд дээрх нөхцөлийг ойлгож байна.
               </span>
             </label>
 
@@ -372,7 +372,7 @@ const OwnerAgreementConfirmPage = () => {
                 onClick={handleStepNext}
                 className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
               >
-                Next
+                Дараах
               </button>
             </div>
           </div>
@@ -423,14 +423,14 @@ const OwnerAgreementConfirmPage = () => {
               onClick={handleStepBack}
               className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Back
+              Буцах
             </button>
             <button
               type="button"
               onClick={handleStepNext}
               className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
             >
-              Next
+              Дараах
             </button>
           </div>
         </div>
@@ -443,9 +443,9 @@ const OwnerAgreementConfirmPage = () => {
           <div className="mx-auto max-w-3xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">Draw your signature</h2>
+                <h2 className="text-xl font-semibold text-slate-900">Гарын үсгээ зурна уу</h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  Sign inside the blank area below.
+                  Доорх хоосон талбайд гарын үсгээ зурна уу.
                 </p>
               </div>
 
@@ -455,7 +455,7 @@ const OwnerAgreementConfirmPage = () => {
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 <RotateCcw className="h-4 w-4" />
-                Clear
+                Арилгах
               </button>
             </div>
 
@@ -469,7 +469,7 @@ const OwnerAgreementConfirmPage = () => {
                 onTouchStart={startDrawing}
                 onTouchMove={draw}
                 onTouchEnd={stopDrawing}
-                className="h-[420px] w-full rounded-[20px] bg-white"
+                className="signature-canvas h-[420px] w-full rounded-[20px] border border-slate-200"
               />
             </div>
           </div>
@@ -480,14 +480,14 @@ const OwnerAgreementConfirmPage = () => {
               onClick={handleStepBack}
               className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Back
+              Буцах
             </button>
             <button
               type="button"
               onClick={handleStepNext}
               className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
             >
-              Next
+              Дараах
             </button>
           </div>
         </div>
@@ -497,9 +497,9 @@ const OwnerAgreementConfirmPage = () => {
     return (
       <div className="px-6 py-8">
         <div className="mx-auto max-w-3xl rounded-[28px] border border-slate-200 bg-slate-50 p-8 text-center shadow-sm">
-          <h2 className="text-2xl font-semibold text-slate-900">Confirmation details ready</h2>
+          <h2 className="text-2xl font-semibold text-slate-900">Баталгаажуулах мэдээлэл бэлэн</h2>
           <p className="mt-3 text-sm leading-7 text-slate-500">
-            Your owner information and signature are ready. You can review the template again or finish this confirmation flow.
+            Таны эзэмшигчийн мэдээлэл болон гарын үсэг бэлэн боллоо. Загварыг дахин хянаад баталгаажуулалтыг дуусгана уу.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -508,7 +508,7 @@ const OwnerAgreementConfirmPage = () => {
               onClick={handleStepBack}
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Back
+              Буцах
             </button>
             <button
               type="button"
@@ -517,7 +517,7 @@ const OwnerAgreementConfirmPage = () => {
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <FileText className="h-4 w-4" />
-              Next Template
+              Гэрээ харах
             </button>
 
             <button
@@ -526,7 +526,7 @@ const OwnerAgreementConfirmPage = () => {
               disabled={submitting}
               className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
-              {submitting ? "Finishing..." : "Finish"}
+              {submitting ? "Дуусгаж байна..." : "Дуусгах"}
             </button>
           </div>
         </div>
@@ -540,7 +540,7 @@ const OwnerAgreementConfirmPage = () => {
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
             <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
-            <p className="mt-3 text-sm text-slate-500">Loading agreement confirmation...</p>
+            <p className="mt-3 text-sm text-slate-500">Гэрээ баталгаажуулах мэдээлэл ачаалж байна...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -552,16 +552,16 @@ const OwnerAgreementConfirmPage = () => {
       <DashboardLayout activeMenu="inquiries">
         <div className="mx-auto max-w-3xl px-4 pb-10 pt-8">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <h1 className="text-2xl font-semibold text-slate-900">Inquiry not found</h1>
+            <h1 className="text-2xl font-semibold text-slate-900">Хүсэлт олдсонгүй</h1>
             <p className="mt-3 text-sm text-slate-500">
-              This inquiry is not available right now.
+              Энэ хүсэлт одоогоор боломжгүй байна.
             </p>
             <Link
               to={ROUTES.INQUIRIES}
               className="mt-6 inline-flex items-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to inquiries
+              Хүсэлтүүд рүү буцах
             </Link>
           </div>
         </div>
@@ -580,13 +580,13 @@ const OwnerAgreementConfirmPage = () => {
                 className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back to inquiries
+                Хүсэлтүүд рүү буцах
               </Link>
               <h1 className="mt-4 text-3xl font-semibold text-slate-900">
-                Confirm Inquiry Agreement
+                Хүсэлтийн гэрээ баталгаажуулах
               </h1>
               <p className="mt-2 text-sm text-slate-500">
-                {inquiry?.listing?.title || "Listing"} • {inquiry?.listing?.leaseTemplateName || "Template"}
+                {inquiry?.listing?.title || "Зар"} • {inquiry?.listing?.leaseTemplateName || "Загвар"}
               </p>
             </div>
 
@@ -597,7 +597,7 @@ const OwnerAgreementConfirmPage = () => {
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <FileText className="h-4 w-4" />
-              <span>View as PDF</span>
+              <span>PDF-ээр харах</span>
               <ExternalLink className="h-4 w-4" />
             </button>
           </div>

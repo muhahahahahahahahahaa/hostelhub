@@ -230,14 +230,14 @@ const TemplateClauseSectionsPage = () => {
 
   const handleSave = async () => {
     if (!currentTemplate) {
-      toast.error("Template not found.");
+      toast.error("Загвар олдсонгүй.");
       return;
     }
 
     const nextContent = buildTemplateContent().trim();
 
     if (!nextContent) {
-      toast.error("At least one clause is required.");
+      toast.error("Дор хаяж нэг заалт шаардлагатай.");
       return;
     }
 
@@ -263,10 +263,10 @@ const TemplateClauseSectionsPage = () => {
       });
 
       updateUser(response.data);
-      toast.success("Template clauses updated successfully.");
+      toast.success("Гэрээний заалтууд амжилттай шинэчлэгдлээ.");
     } catch (error) {
       console.error("Clause update failed", error);
-      toast.error(error?.response?.data?.message || "Failed to save clauses.");
+      toast.error(error?.response?.data?.message || "Заалтууд хадгалж чадсангүй.");
     } finally {
       setSaving(false);
     }
@@ -279,7 +279,7 @@ const TemplateClauseSectionsPage = () => {
     }
 
     if (!buildTemplateContent().trim()) {
-      toast.error("Preview content is empty.");
+      toast.error("Урьдчилж харах агуулга хоосон байна.");
       return;
     }
 
@@ -305,7 +305,7 @@ const TemplateClauseSectionsPage = () => {
       setShowPreview(true);
     } catch (error) {
       console.error("Section preview failed", error);
-      toast.error(error?.response?.data?.message || "Failed to generate preview.");
+      toast.error(error?.response?.data?.message || "Урьдчилсан харагдац үүсгэж чадсангүй.");
     } finally {
       setPreviewLoading(false);
     }
@@ -334,7 +334,7 @@ const TemplateClauseSectionsPage = () => {
                 disabled={previewLoading}
                 className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white hover:bg-blue-700"
               >
-                {previewLoading ? "Preview бэлдэж байна..." : showPreview ? "Preview хаах" : "Preview"}
+                {previewLoading ? "Урьдчилсан харагдац бэлдэж байна..." : showPreview ? "Урьдчилсан харагдац хаах" : "Урьдчилж харах"}
               </button>
               <button
                 type="button"
@@ -343,7 +343,7 @@ const TemplateClauseSectionsPage = () => {
                 className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-medium text-white hover:bg-white/15"
               >
                 <Save className="h-4 w-4" />
-                {saving ? "Saving..." : "Хадгалах"}
+                {saving ? "Хадгалж байна..." : "Хадгалах"}
               </button>
             </div>
           </div>
